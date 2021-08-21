@@ -1125,7 +1125,7 @@ class Music(commands.Cog):
         await ctx.send('Song duration can not be more than 10 mins')
       else:
         try:
-          os.mkdir('./download/'+id)
+          os.mkdir('./download',id)
           ydl.download([url])
         except DownloadError:
           await ctx.send('Download failed.Make sure file is smaller than 60mb.')
