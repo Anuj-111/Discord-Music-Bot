@@ -1113,7 +1113,7 @@ class Music(commands.Cog):
         'preferredcodec': 'mp3',
         'preferredquality': '192',
     }], 
-    'outtmpl':"./download/"+authorId+"/%(id)s.%(ext)s",
+    'outtmpl':"./download/"+authorId+"/%(title)s.%(ext)s",
     'default_search': 'auto',
     'max_filesize': 60000000,
     'quiet': True,
