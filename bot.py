@@ -25,7 +25,7 @@ async def reload(ctx,extension):
   await ctx.send("{} reloaded".format(extension))
 
 
-for filename in os.listdir("/cogs"):
+for filename in os.listdir("./cogs"):
   if filename.endswith(".py"):
     bot.load_extension(f"cogs.{filename[:-3]}")
 
