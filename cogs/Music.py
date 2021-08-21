@@ -1,5 +1,4 @@
-import os, json
-import shutil
+import os, json,shutil
 import time
 import random
 import asyncio
@@ -1102,7 +1101,7 @@ class Music(commands.Cog):
       return ""
 
   
-  #@commands.cooldown(14,604800,type=commands.BucketType.member)
+  @commands.cooldown(15,604800,type=commands.BucketType.member)
   @commands.command(aliases=['dl'],pass_context = True)
   async def download(self,ctx,*,url):
     member = ctx.author
@@ -1133,9 +1132,8 @@ class Music(commands.Cog):
       if file.endswith('.mp3'):
         user = await member.create_dm()
         await user.send(file=discord.File(r'./download/'+authorId+'/'+file))
-      else:
-        os.remove('./download/'+authorId+'/'+file)
-    os.rmdir('./download/'+authorId)
+      shutil.rmtree('./download/'+authorId)
+      break
     
 
     
