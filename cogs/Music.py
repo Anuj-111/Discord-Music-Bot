@@ -1132,7 +1132,7 @@ class Music(commands.Cog):
     for file in os.listdir('./download/'+authorId):
       if file.endswith('.mp3'):
         user = await member.create_dm()
-        await user.send(file=discord.File(r'./download/'+authorId+'/%(title)s.mp3'))
+        await user.send(file=discord.File(r'./download/'+authorId+'/'+file))
       else:
         os.remove('./download/'+authorId+'/'+file)
     os.rmdir('./download/'+authorId)
