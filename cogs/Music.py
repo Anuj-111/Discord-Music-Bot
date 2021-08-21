@@ -319,8 +319,8 @@ class Music(commands.Cog):
       try:
         ytrequest = json.loads(YoutubeSearch(request, max_results=1).to_json())
         request = 'https://www.youtube.com/watch?v='+str(ytrequest['videos'][0]['id'])
-        if ytrequest['videos'][0]['publish_time'] == 0:
-          livestream = True
+        #if ytrequest['videos'][0]['publish_time'] == 0:
+          #livestream = True
       except Exception:
         await ctx.send("`No searches found.`")
         return 
@@ -340,9 +340,9 @@ class Music(commands.Cog):
       if 'entries' in info: 
         info = info['entries'][0]
 
-    if info['is_live'] == True or info['duration'] == 0.0:
-      await ctx.send("Bot currently doesn't support livestreams. Entry denied")
-      return None
+    #if info['is_live'] == True or info['duration'] == 0.0:
+      #await ctx.send("Bot currently doesn't support livestreams. Entry denied")
+      #return None
 
     playlist = True if 'list=' in info else False
     song_info = {'video':info.get('url',None),'id':info.get('id',None),'title':info.get('title',None),'duration':info.get('duration',None),'author': str(ctx.author),'ls':livestream}
@@ -402,9 +402,9 @@ class Music(commands.Cog):
       try:
         ytrequest = json.loads(YoutubeSearch(request, max_results=1).to_json())
         request = 'https://www.youtube.com/watch?v='+str(ytrequest['videos'][0]['id'])
-        if ytrequest['videos'][0]['publish_time'] == 0:
-          await ctx.send("Bot doesn't currently have livestream support")
-          return
+        #if ytrequest['videos'][0]['publish_time'] == 0:
+          #await ctx.send("Bot doesn't currently have livestream support")
+          #return
           
         
       except Exception:
@@ -426,9 +426,9 @@ class Music(commands.Cog):
       if 'entries' in info:
         info = info['entries'][0]
         
-    if info['is_live'] == True or info['duration'] == 0.0:
-      await ctx.send("Bot currently doesn't support livestreams. Entry denied")
-      return None
+    #if info['is_live'] == True or info['duration'] == 0.0:
+      #await ctx.send("Bot currently doesn't support livestreams. Entry denied")
+      #return None
     playlist = True if "list=" in request else False
     song_info = {'video':info.get('url',None),'id':info.get('id',None),'title':info.get('title',None),'duration':info.get('duration',None),'author': str(ctx.author),'ls':livestream}
 
@@ -483,11 +483,10 @@ class Music(commands.Cog):
           try:
             ytrequest = json.loads(YoutubeSearch(request, max_results=1).to_json())
             request = 'https://www.youtube.com/watch?v='+str(ytrequest['videos'][0]['id'])
-            if ytrequest['videos'][0]['publish_time'] == 0:
-              await ctx.send("Bot doesn't currently have livestream support")
-              return
+            #if ytrequest['videos'][0]['publish_time'] == 0:
+              #await ctx.send("Bot doesn't currently have livestream support")
+              #return
             
-          
           except Exception:
             await ctx.send("`No searches found.`")
             return None
@@ -510,9 +509,9 @@ class Music(commands.Cog):
       if "entries" in info:
         info = info['entries'][0]
 
-    if info['is_live'] == True or info['duration'] == 0.0:
-      await ctx.send("Bot currently doesn't support livestreams. Entry denied")
-      return None
+    #if info['is_live'] == True or info['duration'] == 0.0:
+      #await ctx.send("Bot currently doesn't support livestreams. Entry denied")
+      #return None
     playlist = True if 'list=' in request else False
     song_info = {'video':info.get('url',None),'id':info.get('id',None),'title':info.get('title',None),'duration':info.get('duration',None),'author': str(ctx.author),'ls':livestream}
    
