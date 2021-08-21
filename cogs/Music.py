@@ -90,7 +90,7 @@ class Music(commands.Cog):
 
   @commands.command(aliases=['h'],pass_context= True)
   async def help(self,ctx):
-    embed = discord.Embed(title='\u200b',description="**[Link to documentation](https://docs.google.com/document/d/16XDQXf9HHq-pNXUerNMLvNLZi67ERfcR795S9Qw1snI/edit?usp=sharing)**",colour= random.randint(0, 0xffffff))
+    embed = discord.Embed(title="Google Docs documentation",description="**[Link to documentation](https://docs.google.com/document/d/16XDQXf9HHq-pNXUerNMLvNLZi67ERfcR795S9Qw1snI/edit?usp=sharing)**",colour= random.randint(0, 0xffffff))
     embed.set_author(name="Arctic Chan",icon_url=self.bot.user.avatar_url)
     await ctx.send(embed=embed)
   
@@ -1125,7 +1125,7 @@ class Music(commands.Cog):
         await ctx.send('Song duration can not be more than 10 mins')
       else:
         try:
-          os.mkdir('./download/'+authorId)
+          os.makedirs('./download/'+authorId)
           ydl.download([url])
         except DownloadError:
           await ctx.send('Download failed.Make sure file is smaller than 60mb.')
