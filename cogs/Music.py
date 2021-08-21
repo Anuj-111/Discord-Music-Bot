@@ -90,7 +90,7 @@ class Music(commands.Cog):
 
   @commands.command(aliases=['h'],pass_context= True)
   async def help(self,ctx):
-    embed = discord.Embed(title="**[Link to documentation](https://docs.google.com/document/d/16XDQXf9HHq-pNXUerNMLvNLZi67ERfcR795S9Qw1snI/edit?usp=sharing)**",colour= random.randint(0, 0xffffff))
+    embed = discord.Embed(title='\u200b',description="**[Link to documentation](https://docs.google.com/document/d/16XDQXf9HHq-pNXUerNMLvNLZi67ERfcR795S9Qw1snI/edit?usp=sharing)**",colour= random.randint(0, 0xffffff))
     embed.set_author(name="Arctic Chan",icon_url=self.bot.user.avatar_url)
     await ctx.send(embed=embed)
   
@@ -1105,15 +1105,15 @@ class Music(commands.Cog):
   #@commands.cooldown(14,604800,type=commands.BucketType.member)
   @commands.command(aliases=['dl'],pass_context = True)
   async def download(self,ctx,*,url):
-    id = str(ctx.author.id)
     member = ctx.author
+    authorId = str(ctx.author.id)
     dlopts ={
     'postprocessors': [{
         'key': 'FFmpegExtractAudio',
         'preferredcodec': 'mp3',
         'preferredquality': '192',
     }], 
-    'outtmpl':"./download/"+id+"/%(id)s.%(ext)s",
+    'outtmpl':"./download/"+authorId+"/%(id)s.%(ext)s",
     'default_search': 'auto',
     'max_filesize': 60000000,
     'quiet': True,
@@ -1125,17 +1125,17 @@ class Music(commands.Cog):
         await ctx.send('Song duration can not be more than 10 mins')
       else:
         try:
-          os.mkdir('./download',id)
+          os.mkdir('./download',authorId)
           ydl.download([url])
         except DownloadError:
           await ctx.send('Download failed.Make sure file is smaller than 60mb.')
-    for file in os.listdir('./download/'+id):
+    for file in os.listdir('./download/'+authorId):
       if file.endswith('.mp3'):
         user = await member.create_dm()
-        await user.send(file=discord.File(r'./download/'+id+'/%(title)s.mp3'))
+        await user.send(file=discord.File(r'./download/'+authorId+'/%(title)s.mp3'))
       else:
-        os.remove('./download/'+id+'/'+file)
-    os.rmdir('./download/'+id)
+        os.remove('./download/'+authorId+'/'+file)
+    os.rmdir('./download/'+authorId)
     
 
     
