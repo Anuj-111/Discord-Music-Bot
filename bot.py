@@ -9,20 +9,32 @@ bot = commands.Bot(command_prefix = "!",case_insensitive =True)
 async def on_ready():
   print("Bot online")
 
+
+@bot.event
+async def on_command_error(ctx, error):
+  if isinstance(error, commands.CommandNotFound):
+      pass
+  else:
+      raise error
+
 @bot.command()
 async def load(ctx,extension):
-  bot.load_extension(f"cogs.{extension}")
-  await ctx.send("{} loaded".format(extension))
+  if ctx.author.id == 278646990777221120:
+    bot.load_extension(f'cogs.{extension}')
+    await ctx.send("{} loaded".format(extension))
   
 @bot.command()
 async def unload(ctx,extension):
-  bot.unload_extension(f"cogs.{extension}")
-  await ctx.send("{} unloaded".format(extension))
+  if ctx.author.id == 278646990777221120:
+    bot.unload_extension(f'cogs.{extension}')
+    await ctx.send("{} unloaded".format(extension))
+  
 @bot.command()
 async def reload(ctx,extension):
-  bot.unload_extension(f"cogs.{extension}")
-  bot.load_extension(f"cogs.{extension}")
-  await ctx.send("{} reloaded".format(extension))
+  if ctx.author.id == 278646990777221120:
+    bot.unload_extension(f'cogs.{extension}')
+    bot.load_extension(f'cogs.{extension}')
+    await ctx.send("{} reloaded".format(extension))
 
 
 for filename in os.listdir("./cogs"):

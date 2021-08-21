@@ -96,7 +96,7 @@ class Music(commands.Cog):
     if channel == None:
       return
     
-  #cool
+  #cooladfaf
   @commands.command(aliases=['leav','dc','leave','stop'],pass_context = True)
   async def disconnect(self,ctx):
     voice = discord.utils.get(self.bot.voice_clients, guild=ctx.guild)
