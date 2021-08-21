@@ -4,6 +4,7 @@ from discord.ext import commands
 
 
 bot = commands.Bot(command_prefix = "!",case_insensitive =True)
+bot.remove_command('help')
 
 @bot.event
 async def on_ready():
@@ -37,7 +38,7 @@ async def reload(ctx,extension):
     await ctx.send("{} reloaded".format(extension))
 
 
-for filename in os.listdir("./cogs"):
+for filename in os.listdir("C:/Users/kopu9/Code/Discord-Music-Bot/cogs"):
   if filename.endswith(".py"):
     bot.load_extension(f"cogs.{filename[:-3]}")
 

@@ -1,4 +1,5 @@
 import os, json
+import shutil
 import time
 import random
 import asyncio
@@ -85,6 +86,14 @@ class Music(commands.Cog):
     self.bot = bot
     self.player = dict()
     self.options = dict()
+
+
+  @commands.command(aliases=['h'],pass_context= True)
+  async def help(self,ctx):
+    embed = discord.Embed(title="**[Link to documentation](https://docs.google.com/document/d/16XDQXf9HHq-pNXUerNMLvNLZi67ERfcR795S9Qw1snI/edit?usp=sharing)**",colour= random.randint(0, 0xffffff))
+    embed.set_author(name="Arctic Chan",icon_url=self.bot.user.avatar_url)
+    await ctx.send(embed=embed)
+  
    
   @commands.command(aliases=['c','j','connect','summon'],pass_context=True)
   async def join(self,ctx):
@@ -119,7 +128,6 @@ class Music(commands.Cog):
     else:
       await ctx.send("**User isn't connected to Bot's voice channel or bot isn't connected**")
 
-  
   @commands.command(aliases=['q'],pass_context= True)
   async def queue(self,ctx):
     if isinstance(ctx.channel, discord.DMChannel):
@@ -1093,7 +1101,7 @@ class Music(commands.Cog):
     else:
       return ""
 
-
+  
   #@commands.cooldown(14,604800,type=commands.BucketType.member)
   @commands.command(aliases=['dl'],pass_context = True)
   async def download(self,ctx,*,url):
@@ -1117,17 +1125,18 @@ class Music(commands.Cog):
         await ctx.send('Song duration can not be more than 10 mins')
       else:
         try:
+          os.mkdir('./download/'+id)
           ydl.download([url])
         except DownloadError:
           await ctx.send('Download failed.Make sure file is smaller than 60mb.')
     for file in os.listdir('./download/'+id):
       if file.endswith('.mp3'):
         user = await member.create_dm()
-        await user.send(file=discord.File(r'./download'+id+'/%(title).mp3'))
+        await user.send(file=discord.File(r'./download/'+id+'/%(title).mp3'))
       else:
         os.remove('./download/'+id+'/'+file)
     os.rmdir('./download/'+id)
-  
+    
 
     
       
