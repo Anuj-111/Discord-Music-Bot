@@ -103,15 +103,16 @@ class Source(discord.PCMVolumeTransformer):
 
     @classmethod
     def streamvideo(cls,data,ss=0,loop=False,options=""):
+      print(options)
       if ss:
         ffmpeg_options = {
-        'options': '-vn',
-        "before_options": "-ss "+str(ss[0])+" -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5"+options,
+        'options': '-vn'+options,
+        "before_options": "-ss "+str(ss[0])+" -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5",
           }
       else:
         ffmpeg_options = {
         'options': '-vn'+options,#" -loglevel repeat+verbose"
-        "before_options": " -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 1"+options,
+        "before_options": " -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 1",
           }
       return cls(discord.FFmpegPCMAudio(data['video'], **ffmpeg_options),data=data,timeq=[time.time() if not ss else time.time()+ss[1] ,0,0] if not loop else ["looped",0,0],loop=loop) 
 
@@ -870,7 +871,7 @@ class Music(commands.Cog):
       
 
 
-  """
+  
   @commands.command(aliases=['options','settings'],pass_context = True)
   async def opts(self,ctx,setting: str,*,value=None):
     if isinstance(ctx.channel, discord.DMChannel):
@@ -882,11 +883,11 @@ class Music(commands.Cog):
       pass
     elif setting.lower() == "speed":
       if value.isdigit():
-        value = min(max(50,int(value)),200)
+        value = min(max(50,int(value)),200) 
         self.options[serverId][1]['temp'] += ''
       elif value == "pog":
         print('alright1')
-        self.options[serverId][1]['temp'] += ' -af "atempo=2.0,atempo=2.0"'
+        self.options[serverId][1]['temp'] += ' -af "atempo=2.0,atempo=2.0"' 
         if serverId in self.player and ctx.voice_client.is_playing():
             print("alright")
             if self.player[serverId].timeq[2] == 0:
@@ -903,6 +904,7 @@ class Music(commands.Cog):
       eqsets.add_field(name='5 Standard presets:',value='1)Bass Boost, 2)High Boost, 3)Classic, 4)Vocal, 5)Rock')
       await self.seteq1(ctx,eqsets)
 
+  """
   async def seteq1(self,ctx,content):
   
     
@@ -1094,7 +1096,7 @@ class Music(commands.Cog):
             ctx.voice_client.stop()
             self.playmusic(ctx,serverId,tme)
       else:
-          await ctx.send('<0-200)>')
+          await ctx.send('<(0-200)>')
           return None
     """
 
