@@ -2,6 +2,7 @@ import os, json,shutil
 import time
 import random
 import asyncio
+from discord.channel import VoiceChannel
 import youtube_dl
 from youtube_dl import DownloadError
 import discord
@@ -13,7 +14,6 @@ class SessionFinished(Exception):
   pass
 
 db = {}
-
 
 class Timer():
     def __init__(self,bot):
@@ -65,7 +65,7 @@ class Source(discord.PCMVolumeTransformer):
         self.repeat = False
         
 
-    async def breakdownurl(self,url,serverId,Loop=None,npl=True,):
+    async def breakdownurl(self,url,serverId,Loop=None,npl=True):
         ytdl_format_options = {
         'format': 'bestaudio/best',
         'restrictfilenames': True,
@@ -130,8 +130,27 @@ class Music(commands.Cog):
     now = datetime.datetime.now()
     await asyncio.sleep(60-now.second)
     await self.timer.checktimer()
-     
   
+  @commands.Cog.listener()
+  async def on_voice_state_update(self,ctx,before,after):
+    if before.channel and not after.channel:
+      voice = discord.utils.get(self.bot.voice_clients, guild=ctx.guild)
+      if voice and len(voice.channel.members) == 1:
+        await asyncio.sleep(180)
+        voice = discord.utils.get(self.bot.voice_clients, guild=ctx.guild)
+        if voice and len(voice.channel.members) == 1:
+          serverId = ctx.guild.id
+          if serverId in db.keys():
+            del db[serverId]
+          if serverId in self.player:
+            if self.player[serverId].loop:
+              self.player[serverId].set_loop(False)
+            voice.stop()
+          voice.cleanup()
+          await voice.disconnect()
+          await self.timer.delentry(ctx.guild.id) 
+
+
   @commands.Cog.listener()
   async def on_command_completion(self,ctx):
     if ctx.guild.id in self.player:
