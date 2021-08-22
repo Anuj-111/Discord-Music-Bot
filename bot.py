@@ -1,6 +1,8 @@
+import asyncio
 import os
 import discord
 from discord.ext import commands
+import datetime
 
 
 bot = commands.Bot(command_prefix = "!",case_insensitive =True)
@@ -9,11 +11,11 @@ bot.remove_command('help')
 @bot.event
 async def on_ready():
   print("Bot online")
-
+  
 
 @bot.event
 async def on_command_error(ctx, error):
-  if isinstance(error, commands.CommandNotFound):
+  if isinstance(error, commands.CommandNotFound) or isinstance(error,commands.CommandInvokeError):
       pass
   else:
       raise error
@@ -38,7 +40,7 @@ async def reload(ctx,extension):
     await ctx.send("{} reloaded".format(extension))
 
 
-for filename in os.listdir("./cogs"):
+for filename in os.listdir("Discord-Music-Bot/cogs"):
   if filename.endswith(".py"):
     bot.load_extension(f"cogs.{filename[:-3]}")
 
