@@ -754,6 +754,7 @@ class Music(commands.Cog):
         await ctx.send("```Song has been looped🔁```")
       else:
         self.player[serverId].set_loop(False)
+        await ctx.send("```Song has been unlooped🔁```")
 
   async def checkconditions(self,ctx,voice):
     channel = None
