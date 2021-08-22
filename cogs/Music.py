@@ -268,6 +268,8 @@ class Music(commands.Cog):
         queuetime = self.toHMS(timepassed)+"/"+self.toHMS(self.player[id].duration)
       else:
         queuetime = "infite?-looped"
+        progressbar = self.progressbar(0,100)
+        
       embed = discord.Embed(title="Now Playing: ",description =progressbar, colour= discord.Colour.blue())
       embed.set_image(url="http://img.youtube.com/vi/%s/0.jpg" % self.player[id].id)
       embed.add_field(name='`'+queuetime+'`',value="**["+ self.player[id].title +"]("+'https://www.youtube.com/watch?v='+self.player[id].id+")**",inline=False)
