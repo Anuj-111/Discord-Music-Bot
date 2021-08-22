@@ -257,7 +257,7 @@ class Music(commands.Cog):
     
     id = ctx.guild.id
     if id in self.player:
-      if self.player[id].timeq[0] != "looped":
+      if not self.player[id].loop and not self.player[id].ls:
         if self.player[id].timeq[2] == 0:
           timepassed = int(time.time()-(self.player[id].timeq[0]+self.player[id].timeq[1]))
         else:
@@ -380,8 +380,8 @@ class Music(commands.Cog):
       try:
         ytrequest = json.loads(YoutubeSearch(request, max_results=1).to_json())
         request = 'https://www.youtube.com/watch?v='+str(ytrequest['videos'][0]['id'])
-        #if ytrequest['videos'][0]['publish_time'] == 0:
-          #livestream = True
+        if ytrequest['videos'][0]['publish_time'] == 0:
+          livestream = True
       except Exception:
         await ctx.send("`No searches found.`")
         return 
@@ -401,9 +401,9 @@ class Music(commands.Cog):
       if 'entries' in info: 
         info = info['entries'][0]
 
-    #if info['is_live'] == True or info['duration'] == 0.0:
-      #await ctx.send("Bot currently doesn't support livestreams. Entry denied")
-      #return None
+    if info['is_live'] == True or info['duration'] == 0.0:
+      livestream = True
+     
 
     playlist = True if 'list=' in info else False
     song_info = {'video':info.get('url',None),'id':info.get('id',None),'title':info.get('title',None),'duration':info.get('duration',None),'author': str(ctx.author),'ls':livestream}
@@ -463,9 +463,8 @@ class Music(commands.Cog):
       try:
         ytrequest = json.loads(YoutubeSearch(request, max_results=1).to_json())
         request = 'https://www.youtube.com/watch?v='+str(ytrequest['videos'][0]['id'])
-        #if ytrequest['videos'][0]['publish_time'] == 0:
-          #await ctx.send("Bot doesn't currently have livestream support")
-          #return
+        if ytrequest['videos'][0]['publish_time'] == 0:
+          livestream = True
           
         
       except Exception:
@@ -487,9 +486,9 @@ class Music(commands.Cog):
       if 'entries' in info:
         info = info['entries'][0]
         
-    #if info['is_live'] == True or info['duration'] == 0.0:
-      #await ctx.send("Bot currently doesn't support livestreams. Entry denied")
-      #return None
+    if info['is_live'] == True or info['duration'] == 0.0:
+      livestream = True
+
     playlist = True if "list=" in request else False
     song_info = {'video':info.get('url',None),'id':info.get('id',None),'title':info.get('title',None),'duration':info.get('duration',None),'author': str(ctx.author),'ls':livestream}
 
@@ -544,9 +543,8 @@ class Music(commands.Cog):
           try:
             ytrequest = json.loads(YoutubeSearch(request, max_results=1).to_json())
             request = 'https://www.youtube.com/watch?v='+str(ytrequest['videos'][0]['id'])
-            #if ytrequest['videos'][0]['publish_time'] == 0:
-              #await ctx.send("Bot doesn't currently have livestream support")
-              #return
+            if ytrequest['videos'][0]['publish_time'] == 0:
+              livestream = True
             
           except Exception:
             await ctx.send("`No searches found.`")
@@ -570,9 +568,9 @@ class Music(commands.Cog):
       if "entries" in info:
         info = info['entries'][0]
 
-    #if info['is_live'] == True or info['duration'] == 0.0:
-      #await ctx.send("Bot currently doesn't support livestreams. Entry denied")
-      #return None
+    if info['is_live'] == True or info['duration'] == 0.0:
+      livestream = True
+
     playlist = True if 'list=' in request else False
     song_info = {'video':info.get('url',None),'id':info.get('id',None),'title':info.get('title',None),'duration':info.get('duration',None),'author': str(ctx.author),'ls':livestream}
    
@@ -850,7 +848,7 @@ class Music(commands.Cog):
       
 
 
-    """
+  """
   @commands.command(aliases=['options','settings'],pass_context = True)
   async def opts(self,ctx,setting: str,*,value=None):
     if isinstance(ctx.channel, discord.DMChannel):
@@ -1004,7 +1002,7 @@ class Music(commands.Cog):
 
 
 
-    """
+  """
     elif setting == "bass":
       if not value or value == "reset":
         if 'bass' in self.options[serverId][1]:
@@ -1087,7 +1085,7 @@ class Music(commands.Cog):
         print(options)
         player = Source.streamvideo(nowplaying[0],loop=loop,ss=nowplaying[1],options=options)
         self.player[id] = player
-        ctx.voice_client.play(player, after=lambda e: self.playmusic(ctx,id) and self.reseteffects(id) if not player.repeat else player.set_repeat(False))
+        ctx.voice_client.play(player, after=lambda e: self.playmusic(ctx,id,self.player[id].loop) and self.reseteffects(id) if not player.repeat else player.set_repeat(False))
         return None
       if id in self.player:
         if self.player[id].loop == True:
@@ -1105,7 +1103,7 @@ class Music(commands.Cog):
           
       player = Source.streamvideo(nowplaying,loop=loop,options=options)
       self.player[id] = player
-      ctx.voice_client.play(player, after=lambda e: self.playmusic(ctx,id) and self.reseteffects(id) if not player.repeat else player.set_repeat(False))
+      ctx.voice_client.play(player, after=lambda e: self.playmusic(ctx,id,loop=self.player[id].loop) and self.reseteffects(id) if not player.repeat else player.set_repeat(False))
       
 
   def reseteffects(self,id):
@@ -1249,27 +1247,6 @@ class Music(commands.Cog):
   """
 
 
-
-"""
-songs = db[id]
-if songs:
-  voice = discord.utils.get(self.bot.voice_clients, guild=ctx.guild)
-  with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-    print("Downloading audio now\n")
-    ydl.download([songs[0]])
-    for file in os.listdir("./"):
-      if file.endswith(".mp3"):
-        name = file
-        os.rename(file, id+".mp3")
-        print('file renamed')
-    
-
-    nname = name.rsplit("-", 2)
-    print(f"playing\n{nname}")
-    """
-  
-      
-        
 
 def setup(bot):
   bot.add_cog(Music(bot))
