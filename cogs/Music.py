@@ -871,7 +871,7 @@ class Music(commands.Cog):
       
 
 
-  
+  """
   @commands.command(aliases=['options','settings'],pass_context = True)
   async def opts(self,ctx,setting: str,*,value=None):
     if isinstance(ctx.channel, discord.DMChannel):
@@ -904,7 +904,7 @@ class Music(commands.Cog):
       eqsets.add_field(name='5 Standard presets:',value='1)Bass Boost, 2)High Boost, 3)Classic, 4)Vocal, 5)Rock')
       await self.seteq1(ctx,eqsets)
 
-  """
+  
   async def seteq1(self,ctx,content):
   
     
