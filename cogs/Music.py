@@ -863,6 +863,7 @@ class Music(commands.Cog):
       pass
     elif setting.lower() == "speed":
       if serverId in self.player and ctx.voice_client.is_playing():
+        value1 = None
         if 'speed' in s_opts[serverId][1]['temp']:
           if len(s_opts[serverId][1]['temp']['speed'])> 12:
             value1 = 4.0
