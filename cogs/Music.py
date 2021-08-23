@@ -891,8 +891,14 @@ class Music(commands.Cog):
         if not value:
           if 'speed' in s_opts[serverId][1]['temp'].keys():
             del s_opts[serverId][1]['temp']['speed']
-            await ctx.send('Speed has been reset to **1**')
+            await ctx.send('Speed has been reset to **1x**')
         elif value.isdigit():
+          if int(value) == 100:
+            if 'speed' in s_opts[serverId][1]['temp'].keys():
+              del s_opts[serverId][1]['temp']['speed']
+              await ctx.send("Speed has bas been reset to **1x**")
+            else:
+              return None
           value = (min(max(50,int(value)),200)/100.0)
           s_opts[serverId][1]['temp']['speed'] = f'atempo={value},'
           await ctx.send(f'Speed has been reset to **{value}x**')
@@ -917,7 +923,7 @@ class Music(commands.Cog):
       await self.seteq1(ctx,eqsets)
 
   """
-  async def seteq1(self,ctx,content):
+  async def seteq1(self,ctx,content):20
   
     
     serverId = ctx.guild.id
