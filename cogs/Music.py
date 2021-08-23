@@ -755,7 +755,7 @@ class Music(commands.Cog):
         await channel.connect(timeout=60.0,reconnect=True)
         db[serverId] = []
         s_opts[serverId] = ["",{},0]
-        s_opts[serverId][1]['volume'] = 125
+        s_opts[serverId][1]['volume'] = 0.5
         s_opts[serverId][1]['temp'] = dict()
       except asyncio.TimeoutError:
         await ctx.send('bot has disconnected')
@@ -868,13 +868,14 @@ class Music(commands.Cog):
         self.playmusic(ctx,serverId,nowplaying=[self.player[serverId].data,tme],loop=self.player[serverId].loop)
     elif setting.lower() == "volume" or setting.lower() == "vol":
       if not value:
-        if s_opts[serverId][1]['volume'] != 125:
-          s_opts[serverId][1]['volume'] = 125
-          await ctx.send("default volume has been reset to 125%")
+        if s_opts[serverId][1]['volume'] != 0.5:
+          s_opts[serverId][1]['volume'] = 0.5
+          await ctx.send("Default volume has been reset to 125%")
       if value.isdigit():
         value = min(max(25,int(value)),250)
+        value = value/250
         s_opts[serverId][1]['volume'] = value
-        await ctx.send(f'default volume has been set to {value}')
+        await ctx.send(f'Default volume has been set to {value}')
 
       
     elif setting.lower() == "adveq":
