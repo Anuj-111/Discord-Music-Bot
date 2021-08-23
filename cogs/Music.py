@@ -22,7 +22,7 @@ class Timer():
         self.check = dict()
         
     async def delentry(self,serverId):
-        for key in self.check.keys():
+        for key in self.check:
             if serverId in self.check[key]:
                 del self.check[key][serverId]
             
@@ -105,7 +105,7 @@ class Source(discord.PCMVolumeTransformer):
 
 
     @classmethod
-    def streamvideo(cls,data,ss=0,loop=False,options=None):
+    def streamvideo(cls,data,ss=0,loop=False,options=None,volume=None):
       if ss:
         ffmpeg_options = {
         'options': '-vn '+options,
@@ -116,7 +116,7 @@ class Source(discord.PCMVolumeTransformer):
         'options': '-vn '+options,#" -loglevel repeat+verbose"
         "before_options": " -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 1",
           }
-      return cls(discord.FFmpegPCMAudio(data['video'], **ffmpeg_options),data=data,timeq=[time.time() if not ss else time.time()+ss[1] ,0,0] if not loop else ["looped",0,0],loop=loop) 
+      return cls(discord.FFmpegPCMAudio(data['video'], **ffmpeg_options),data=data,timeq=[time.time() if not ss else time.time()+ss[1] ,0,0] if not loop else ["looped",0,0],loop=loop,volume=volume) 
 
 
 
@@ -142,7 +142,7 @@ class Music(commands.Cog):
         voice = discord.utils.get(self.bot.voice_clients, guild=ctx.guild)
         if voice and len(voice.channel.members) == 1:
           serverId = ctx.guild.id
-          if serverId in db.keys():
+          if serverId in db:
             del db[serverId]
             del s_opts[serverId]
         
@@ -186,7 +186,7 @@ class Music(commands.Cog):
       await ctx.send('Use Arctic-Chan in a server please.')
       return None
     serverId = ctx.guild.id
-    if serverId in db.keys():
+    if serverId in db:
        del db[serverId]
        del s_opts[serverId]
     if voice and voice.is_connected() and ctx.author.voice and ctx.author.voice.channel == voice.channel:
@@ -221,7 +221,7 @@ class Music(commands.Cog):
         embed.set_footer(text="`Loop:`❌")
       embed.add_field(name="**Now Playing**",value="["+str(self.wslice(self.player[id].title,50))+"]("+'https://www.youtube.com/watch?v='+self.player[id].id+")`|"+self.toHMS(self.player[id].duration)+"| Requested by: "+str(self.player[id].author)+"`",inline=False)
  
-      if serverId in db.keys(): 
+      if serverId in db: 
         for value,song in enumerate(db[serverId]):
           if value == 0:
              embed.add_field(name='Rest in Queue',value=str(value+1)+")["+self.wslice(song.get('title'),50)+"]("+'https://www.youtube.com/watch?v='+song.get('id')+")`|"+self.toHMS(song.get('duration'))+"| Requested by: "+str(song.get('author'))+"`",inline = False)
@@ -319,7 +319,7 @@ class Music(commands.Cog):
       await ctx.send('Use Arctic-Chan in a server please.')
       return None
     serverId = ctx.guild.id
-    if serverId in db.keys():
+    if serverId in db:
       random.shuffle(db[serverId])
       await ctx.send("`Song queue has been shuffled 🔀`")
 
@@ -357,7 +357,7 @@ class Music(commands.Cog):
     serverId = ctx.guild.id
     if serverId in self.player:
       voice = discord.utils.get(self.bot.voice_clients, guild=ctx.guild)
-      voice.source.volume = volume / 500
+      voice.source.volume = volume / 250
       await ctx.send(f"Volume for this song has been adjusted {volume}%")
     else:
       await ctx.send("Audio source is not connected to channel.")
@@ -432,7 +432,7 @@ class Music(commands.Cog):
       return None
 
     info2 = await Source.breakdownurl(self,request,serverId,Loop = self.bot.loop,npl=False)
-    if serverId in db.keys():
+    if serverId in db:
         if db[serverId][0]['id'] == info.get('id',None):
           firstsong = db[serverId].pop(0)
     else:
@@ -645,13 +645,13 @@ class Music(commands.Cog):
     serverId = ctx.guild.id
     author = ctx.message.content.split(" ",1)[1] if len(ctx.message.content.split(" ",1)) > 1 else None
     if author == None:
-      if serverId in db.keys() and len(db[serverId]) > 0:
+      if serverId in db and len(db[serverId]) > 0:
         del db[serverId]
         await ctx.send("```Queue has been Cleared 🧹```")
       else:
         await ctx.send("```Nothing to Clear ¯\_(ツ)_/¯```")
       return None
-    if serverId in db.keys():
+    if serverId in db:
       guild = self.bot.get_guild(int(serverId))
       author = int(author[3:-1])
       name = await guild.fetch_member(author)
@@ -755,7 +755,7 @@ class Music(commands.Cog):
         await channel.connect(timeout=60.0,reconnect=True)
         db[serverId] = []
         s_opts[serverId] = ["",{},0]
-        s_opts[serverId][1]['volume'] = 75
+        s_opts[serverId][1]['volume'] = 125
         s_opts[serverId][1]['temp'] = dict()
       except asyncio.TimeoutError:
         await ctx.send('bot has disconnected')
@@ -842,12 +842,12 @@ class Music(commands.Cog):
     elif setting.lower() == "speed":
       if serverId in self.player and ctx.voice_client.is_playing():
         if not value:
-          if 'speed' in s_opts[serverId][1]['temp'].keys():
+          if 'speed' in s_opts[serverId][1]['temp']:
             del s_opts[serverId][1]['temp']['speed']
             await ctx.send('Speed has been reset to **1x**')
         elif value.isdigit():
           if int(value) == 100:
-            if 'speed' in s_opts[serverId][1]['temp'].keys():
+            if 'speed' in s_opts[serverId][1]['temp']:
               del s_opts[serverId][1]['temp']['speed']
               await ctx.send("Speed has bas been reset to **1x**")
             else:
@@ -866,9 +866,17 @@ class Music(commands.Cog):
         self.player[serverId].set_repeat(True)
         ctx.voice_client.stop()
         self.playmusic(ctx,serverId,nowplaying=[self.player[serverId].data,tme],loop=self.player[serverId].loop)
+    elif setting.lower() == "volume" or setting.lower() == "vol":
+      if not value:
+        if s_opts[serverId][1]['volume'] != 125:
+          s_opts[serverId][1]['volume'] = 125
+          await ctx.send("default volume has been reset to 125%")
+      if value.isdigit():
+        value = min(max(25,int(value)),250)
+        s_opts[serverId][1]['volume'] = value
+        await ctx.send(f'default volume has been set to {value}')
+
       
-
-
     elif setting.lower() == "adveq":
       eqsets = discord.Embed(title=f"{self.bot.user.name}'s equalization",description='Pick from 5 standard presets or make your own by clicking the + button. If you are creating your own presets please prepare your settings beforehand. You can find info on the eq settings you can set in ```!opts eqinfo```.',colour=0x02C1ff)
       eqsets.add_field(name="Please Note:",value="Only create custom presets if you know what you're doing. Faulty presets may cause audio clipping and **damage your audio equipment.**",inline=False)
@@ -1074,7 +1082,7 @@ class Music(commands.Cog):
        
   def playmusic(self,ctx,id,nowplaying=None,loop=False):
       if nowplaying:
-        player = Source.streamvideo(nowplaying[0],loop=loop,ss=nowplaying[1],options=self.getoptions(id))
+        player = Source.streamvideo(nowplaying[0],loop=loop,ss=nowplaying[1],options=self.getoptions(id),volume=s_opts[id][1]['volume'])
         self.player[id] = player
         ctx.voice_client.play(player, after=lambda e: self.reseteffects(id) or self.playmusic(ctx,id,loop=self.player[id].loop) if not player.repeat else player.set_repeat(False))
         return None
@@ -1083,24 +1091,24 @@ class Music(commands.Cog):
           loop = True
           nowplaying = self.player[id].data
       if not nowplaying:
-        if id in db.keys() and len(db[id]) > 0:
+        if id in db and len(db[id]) > 0:
           nowplaying = db[id].pop(0)
         else:
           del self.player[id]
-          if id in db.keys():
+          if id in db:
             self.timer.setentry(id)
           return None 
           
-      player = Source.streamvideo(nowplaying,loop=loop,options=self.getoptions(id))
+      player = Source.streamvideo(nowplaying,loop=loop,options=self.getoptions(id),volume=s_opts[id][1]['volume'])
       self.player[id] = player
       ctx.voice_client.play(player, after=lambda e: self.reseteffects(id) or self.playmusic(ctx,id,loop=self.player[id].loop) if not player.repeat else player.set_repeat(False))
       
 
   def getoptions(self,serverId):
-    if serverId in s_opts.keys():
+    if serverId in s_opts:
       if s_opts[serverId][1]['temp']:
         temp = '-af "'
-        for key in s_opts[serverId][1]['temp'].keys():
+        for key in s_opts[serverId][1]['temp']:
           temp += s_opts[serverId][1]['temp'][key]
         temp = temp[:-1] + '"'
         return temp
@@ -1114,7 +1122,7 @@ class Music(commands.Cog):
 
 
   def reseteffects(self,id):
-    if id in s_opts.keys():
+    if id in s_opts:
       if s_opts[id][1]['temp']:
         s_opts[id][1]['temp'].clear()
     
@@ -1154,7 +1162,7 @@ class Music(commands.Cog):
 
   def durationtillplay(self,id,position):
    td = 0
-   if id in db.keys():
+   if id in db:
      for i in range(position-1):
        td += db[id][i].get('duration')
    if self.player[id].timeq[2] == 0:
