@@ -13,7 +13,8 @@ import datetime
 class SessionFinished(Exception):
   pass
 
-db = {}
+db = dict()
+s_opts = dict()
 
 class Timer():
     def __init__(self,bot):
@@ -30,11 +31,13 @@ class Timer():
         if self.check:
             if str(now.minute) in self.check:
                 for i in self.check[str(now.minute)]:
+                    del s_opts[i]
                     guild = await self.bot.fetch_guild(i)
                     voice = discord.utils.get(self.bot.voice_clients, guild=guild)
                     voice.cleanup()
                     await voice.disconnect()
                 del self.check[str(now.minute)]
+               
         await asyncio.sleep(60)
         await self.checktimer()
                     
@@ -70,8 +73,8 @@ class Source(discord.PCMVolumeTransformer):
         'format': 'bestaudio/best',
         'restrictfilenames': True,
         'noplaylist': npl,
-        'verbose': True,
-        'quiet': False,
+        'verbose': False,
+        'quiet': True,
         'default_search': 'auto',
         'nocheckcertificate': True,
         'ignoreerrors': False,
@@ -98,20 +101,19 @@ class Source(discord.PCMVolumeTransformer):
         self.timeq[2] = tme
       if not pause:
         self.timeq[1] += int(tme-self.timeq[2])
-        self.timeq[2] = 0
+        self.timeq[2] = 0 
 
 
     @classmethod
-    def streamvideo(cls,data,ss=0,loop=False,options=""):
-      print(options)
+    def streamvideo(cls,data,ss=0,loop=False,options=None):
       if ss:
         ffmpeg_options = {
-        'options': '-vn'+options,
+        'options': '-vn '+options,
         "before_options": "-ss "+str(ss[0])+" -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5",
           }
       else:
         ffmpeg_options = {
-        'options': '-vn'+options,#" -loglevel repeat+verbose"
+        'options': '-vn '+options,#" -loglevel repeat+verbose"
         "before_options": " -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 1",
           }
       return cls(discord.FFmpegPCMAudio(data['video'], **ffmpeg_options),data=data,timeq=[time.time() if not ss else time.time()+ss[1] ,0,0] if not loop else ["looped",0,0],loop=loop) 
@@ -123,7 +125,6 @@ class Music(commands.Cog):
   def __init__(self,bot):
     self.bot = bot
     self.player = dict()
-    self.options = dict()
     self.timer = Timer(bot)
     
   @commands.Cog.listener()
@@ -143,6 +144,8 @@ class Music(commands.Cog):
           serverId = ctx.guild.id
           if serverId in db.keys():
             del db[serverId]
+            del s_opts[serverId]
+        
           if serverId in self.player:
             if self.player[serverId].loop:
               self.player[serverId].set_loop(False)
@@ -185,6 +188,7 @@ class Music(commands.Cog):
     serverId = ctx.guild.id
     if serverId in db.keys():
        del db[serverId]
+       del s_opts[serverId]
     if voice and voice.is_connected() and ctx.author.voice and ctx.author.voice.channel == voice.channel:
       if serverId in self.player:
         if self.player[serverId].loop == True:
@@ -282,6 +286,8 @@ class Music(commands.Cog):
           timepassed = int(time.time()-(self.player[id].timeq[0]+self.player[id].timeq[1]))
         else:
           timepassed = int(self.player[id].timeq[2]-self.player[id].timeq[0])
+        if 'speed' in s_opts[id]['temp'].keys():
+          timepassed = int(timepassed)
         if timepassed > self.player[id].duration:
           timepassed = self.player[id].duration
         progressbar = self.progressbar(timepassed,self.player[id].duration)
@@ -795,9 +801,9 @@ class Music(commands.Cog):
       try:
         serverId = ctx.guild.id
         await channel.connect(timeout=60.0,reconnect=True)
-        self.options[serverId] = ["",{},0]
-        self.options[serverId][1]['volume'] = 75
-        self.options[serverId][1]['temp'] = ''
+        s_opts[serverId] = ["",{},0]
+        s_opts[serverId][1]['volume'] = 75
+        s_opts[serverId][1]['temp'] = dict()
       except asyncio.TimeoutError:
         await ctx.send('bot has disconnected')
     return channel
@@ -855,10 +861,10 @@ class Music(commands.Cog):
        return None 
       await ctx.author.voice.channel.connect(timeout=60.0,reconnect=True)
       """
-      if self.options[id][1]['temp']:
-        options = self.options[id][1]['temp']
+      if s_opts[id][1]['temp']:
+        options = s_opts[id][1]['temp']
       else:
-        options = self.options[id][0]
+        options = s_opts[id][0]
       """
       
       options = ' -af "volume=5dB" -af "equalizer=f=10:width_type=q:width=1.4:g=-3,equalizer=f=21:width_type=q:width=1.4:g=-3,equalizer=f=42:width_type=q:width=1.4:g=-3,equalizer=f=83:width_type=q:width=1.4:g=-3,equalizer=f=166:width_type=q:width=1.4:g=-3,equalizer=f=333:width_type=q:width=1.4:g=-3,equalizer=f=577:width_type=q:width=1.4:g=-3,equalizer=f=1000:width_type=q:width=1.4:g=-3,equalizer=f=2000:width_type=q:width=1.4:g=-1,equalizer=f=4000:width_type=q:width=1.4:g=1,equalizer=f=8000:width_type=q:width=1.4:g=3.5,equalizer=f=16000:width_type=q:width=1.4:g=6,equalizer=f=20000:width_type=q:width=3:g=8"'
@@ -871,47 +877,53 @@ class Music(commands.Cog):
       
 
 
-  """
+  
   @commands.command(aliases=['options','settings'],pass_context = True)
   async def opts(self,ctx,setting: str,*,value=None):
     if isinstance(ctx.channel, discord.DMChannel):
       await ctx.send('Use Arctic-Chan in a server please.')
       return None
-    
     serverId = ctx.guild.id
     if setting == None:
       pass
     elif setting.lower() == "speed":
-      if value.isdigit():
-        value = min(max(50,int(value)),200) 
-        self.options[serverId][1]['temp'] += ''
-      elif value == "pog":
-        print('alright1')
-        self.options[serverId][1]['temp'] += ' -af "atempo=2.0,atempo=2.0"' 
-        if serverId in self.player and ctx.voice_client.is_playing():
-            print("alright")
-            if self.player[serverId].timeq[2] == 0:
-              timepassed = int(time.time()-(self.player[serverId].timeq[0]+self.player[serverId].timeq[1]))
-            else:
-              timepassed = int(self.player[serverId].timeq[2]-self.player[serverId].timeq[0])
-            tme = [timepassed,-timepassed]
-            self.player[serverId].set_repeat(True)
-            ctx.voice_client.stop()
-            self.playmusic(ctx,serverId,tme)
+      if serverId in self.player and ctx.voice_client.is_playing():
+        if not value:
+          if 'speed' in s_opts[serverId][1]['temp'].keys():
+            del s_opts[serverId][1]['temp']['speed']
+            await ctx.send('Speed has been reset to **1**')
+        elif value.isdigit():
+          value = (min(max(50,int(value)),200)/100.0)
+          s_opts[serverId][1]['temp']['speed'] = f'atempo={value},'
+          await ctx.send(f'Speed has been reset to **{value}x**')
+        elif value == "pog":
+          s_opts[serverId][1]['temp']['speed'] = 'atempo=2.0,atempo=2.0,'
+          await ctx.send(f'Speed has been reset to **POGGERS(4x)**')
+        if self.player[serverId].timeq[2] == 0:
+          timepassed = int(time.time()-(self.player[serverId].timeq[0]+self.player[serverId].timeq[1]))
+        else:
+          timepassed = int(self.player[serverId].timeq[2]-self.player[serverId].timeq[0])
+        tme = [timepassed,-timepassed]
+        self.player[serverId].set_repeat(True)
+        ctx.voice_client.stop()
+        self.playmusic(ctx,serverId,nowplaying=[self.player[serverId].data,tme],loop=self.player[serverId].loop)
+      
+
+
     elif setting.lower() == "adveq":
       eqsets = discord.Embed(title=f"{self.bot.user.name}'s equalization",description='Pick from 5 standard presets or make your own by clicking the + button. If you are creating your own presets please prepare your settings beforehand. You can find info on the eq settings you can set in ```!opts eqinfo```.',colour=0x02C1ff)
       eqsets.add_field(name="Please Note:",value="Only create custom presets if you know what you're doing. Faulty presets may cause audio clipping and **damage your audio equipment.**",inline=False)
       eqsets.add_field(name='5 Standard presets:',value='1)Bass Boost, 2)High Boost, 3)Classic, 4)Vocal, 5)Rock')
       await self.seteq1(ctx,eqsets)
 
-  
+  """
   async def seteq1(self,ctx,content):
   
     
     serverId = ctx.guild.id
     allbuttons = ['1️⃣','2️⃣️','3️⃣','4️⃣','5️⃣','6️⃣','7️⃣','8️⃣','9️⃣','🔟']
     button = []
-    length = len(self.options[serverId][1]['presets'])
+    length = len(s_opts[serverId][1]['presets'])
     for i in range(length):
       button.append(allbutons[i])
     if length != 10:
@@ -927,52 +939,52 @@ class Music(commands.Cog):
         if str(reaction.emoji) == '➕':
           raise SessionFinished
         elif str(reaction.emoji) == '1️⃣':
-          self.options[serverId][0] = self.options[serverId][1]['presets'][0]
+          s_opts[serverId][0] = s_opts[serverId][1]['presets'][0]
           await ctx.send('**Preset has been changed to 1**')
           message.delete()
           return None
         elif str(reaction.emoji) == '2️⃣':
-          self.options[serverId][0] = self.options[serverId][1]['presets'][1]
+          s_opts[serverId][0] = s_opts[serverId][1]['presets'][1]
           await ctx.send('**Preset has been changed to 2**')
           message.delete()
           return None
         elif str(reaction.emoji) == '3️⃣':
-          self.options[serverId][0] = self.options[serverId][1]['presets'][2]
+          s_opts[serverId][0] = s_opts[serverId][1]['presets'][2]
           await ctx.send('**Preset has been changed to 3**')
           message.delete()
           return None
         elif str(reaction.emoji) == '4️⃣':
-          self.options[serverId][0] = self.options[serverId][1]['presets'][3]
+          s_opts[serverId][0] = s_opts[serverId][1]['presets'][3]
           await ctx.send('**Preset has been changed to 4**')
           message.delete()
           return None
         elif str(reaction.emoji) == '5️⃣':
-          self.options[serverId][0] = self.options[serverId][1]['presets'][4]
+          s_opts[serverId][0] = s_opts[serverId][1]['presets'][4]
           await ctx.send('**Preset has been changed to 5**')
           message.delete()
           return None
         elif str(reaction.emoji) == '6️⃣':
-          self.options[serverId][0] = self.options[serverId][1]['presets'][5]
+          s_opts[serverId][0] = s_opts[serverId][1]['presets'][5]
           await ctx.send('**Preset has been changed to 6**')
           message.delete()
           return None
         elif str(reaction.emoji) == '7️⃣':
-          self.options[serverId][0] = self.options[serverId][1]['presets'][6]
+          s_opts[serverId][0] = s_opts[serverId][1]['presets'][6]
           await ctx.send('**Preset has been changed to 7**')
           message.delete()
           return None
         elif str(reaction.emoji) == '8️⃣':
-          self.options[serverId][0] = self.options[serverId][1]['presets'][7]
+          s_opts[serverId][0] = s_opts[serverId][1]['presets'][7]
           message.delete()
           await ctx.send('**Preset has been changed to 8**')
           return None
         elif str(reaction.emoji) == '9️⃣':
-          self.options[serverId][0] = self.options[serverId][1]['presets'][8]
+          s_opts[serverId][0] = s_opts[serverId][1]['presets'][8]
           await ctx.send('**Preset has been changed to 9**')
           message.delete()
           return None
         elif str(reaction.emoji) == "🔟":
-          self.options[serverId][0] = self.options[serverId][1]['presets'][9]
+          s_opts[serverId][0] = s_opts[serverId][1]['presets'][9]
           await ctx.send('**Preset has been changed to 10**')
           message.delete()
           return None
@@ -1029,26 +1041,26 @@ class Music(commands.Cog):
   """
     elif setting == "bass":
       if not value or value == "reset":
-        if 'bass' in self.options[serverId][1]:
-          temp = self.options[serverId][1]['bass']
-          self.options[serverId][1]['bass'] = 0
-          if not 'treble' in self.options[serverId][1]:
-            self.options[serverId][1]['temp'].replace(" -af bass=g="+str(temp),"")
+        if 'bass' in s_opts[serverId][1]:
+          temp = s_opts[serverId][1]['bass']
+          s_opts[serverId][1]['bass'] = 0
+          if not 'treble' in s_opts[serverId][1]:
+            s_opts[serverId][1]['temp'].replace(" -af bass=g="+str(temp),"")
           else:
-            self.options[serverId][1]['temp'].replace(" bass=g="+str(temp),"")
+            s_opts[serverId][1]['temp'].replace(" bass=g="+str(temp),"")
           tme = 10
           self.playmusic(ctx,serverId,tme)
       elif value.isdigit(): 
          value = int(value)
          value = max(min(value,200),-200)
          value /= 20
-         if 'bass' in self.options[serverId][1]:
-           self.options[serverId][1]['temp'].replace("-af bass=g="+str(self.options[serverId][1]['bass']),"-af bass=g"+str(value))
-         elif 'treble' in self.options[serverId][1]:
-           self.options[serverId][1]['temp'].replace("-af treble=g="+str(self.options[serverId][1]['treble']),"-af bass=g="+str(value)+" treble=g="+str(self.options[serverId][1]['treble']))
+         if 'bass' in s_opts[serverId][1]:
+           s_opts[serverId][1]['temp'].replace("-af bass=g="+str(s_opts[serverId][1]['bass']),"-af bass=g"+str(value))
+         elif 'treble' in s_opts[serverId][1]:
+           s_opts[serverId][1]['temp'].replace("-af treble=g="+str(s_opts[serverId][1]['treble']),"-af bass=g="+str(value)+" treble=g="+str(s_opts[serverId][1]['treble']))
          else:
-           self.options[serverId][1]['temp'] += " -af bass=g="+str(value)
-         self.options[serverId][1]['bass'] = value
+           s_opts[serverId][1]['temp'] += " -af bass=g="+str(value)
+         s_opts[serverId][1]['bass'] = value
          if ctx.voice_client.is_playing():
             tme = 10
             if self.player[serverId].timeq[2] == 0:
@@ -1066,23 +1078,23 @@ class Music(commands.Cog):
       if not value or value == "reset":
         if 'treble' in self.player[serverId][1]:
           temp = self.player[serverId][1]['treble']
-          self.options[serverId][1]['treble'] = 0
-          if 'bass' in self.options[id][1]:
-            self.options[serverId][1]['temp'].replace(" treble=g="+str(temp),"")
+          s_opts[serverId][1]['treble'] = 0
+          if 'bass' in s_opts[id][1]:
+            s_opts[serverId][1]['temp'].replace(" treble=g="+str(temp),"")
           else:
-            self.options[serverId][1]['temp'].replace(" -af treble=g="+str(temp),"")
+            s_opts[serverId][1]['temp'].replace(" -af treble=g="+str(temp),"")
           self.playmusic(ctx,serverId,tme)
       elif value.isdigit(): 
          value = int(value)
          value = max(min(value,200),-200)
          value /= 20
-         if 'treble' in self.options[serverId][1]:
-            self.options[id][1]['temp'].replace("treble=g="+str(self.options[serverId][1]['treble']),"treble=g="+str(value))
-         elif 'bass' in self.options[serverId][1]:
-           self.options[serverId][1]['temp'].replace("-af bass=g="+str(self.options[serverId][1]['bass']),"-af bass=g="+str(self.options[serverId][1]['bass'])+" treble=g="+str(value))
+         if 'treble' in s_opts[serverId][1]:
+            s_opts[id][1]['temp'].replace("treble=g="+str(s_opts[serverId][1]['treble']),"treble=g="+str(value))
+         elif 'bass' in s_opts[serverId][1]:
+           s_opts[serverId][1]['temp'].replace("-af bass=g="+str(s_opts[serverId][1]['bass']),"-af bass=g="+str(s_opts[serverId][1]['bass'])+" treble=g="+str(value))
          else:
-           self.options[serverId][1]['temp'] += " -af treble=g="+str(value)
-         self.options[serverId][1]['treble'] = value
+           s_opts[serverId][1]['temp'] += " -af treble=g="+str(value)
+         s_opts[serverId][1]['treble'] = value
          if ctx.voice_client.is_playing():
             tme = 10
             
@@ -1101,15 +1113,11 @@ class Music(commands.Cog):
     """
 
        
-       
-  def playmusic(self,ctx,id,nowplaying=None,loop=False,options=None):
-      if not options:
-        options = self.options[id][0] if self.options[id][1]['temp'] == None else self.options[id][1]['temp'] 
+  def playmusic(self,ctx,id,nowplaying=None,loop=False):
       if nowplaying:
-        print(options)
-        player = Source.streamvideo(nowplaying[0],loop=loop,ss=nowplaying[1],options=options)
+        player = Source.streamvideo(nowplaying[0],loop=loop,ss=nowplaying[1],options=self.getoptions(id))
         self.player[id] = player
-        ctx.voice_client.play(player, after=lambda e: self.playmusic(ctx,id,self.player[id].loop) and self.reseteffects(id) if not player.repeat else player.set_repeat(False))
+        ctx.voice_client.play(player, after=lambda e: self.reseteffects(id) or self.playmusic(ctx,id,loop=self.player[id].loop) if not player.repeat else player.set_repeat(False))
         return None
       if id in self.player:
         if self.player[id].loop == True:
@@ -1125,14 +1133,31 @@ class Music(commands.Cog):
           self.timer.setentry(id)
           return None 
           
-      player = Source.streamvideo(nowplaying,loop=loop,options=options)
+      player = Source.streamvideo(nowplaying,loop=loop,options=self.getoptions(id))
       self.player[id] = player
-      ctx.voice_client.play(player, after=lambda e: self.playmusic(ctx,id,loop=self.player[id].loop) and self.reseteffects(id) if not player.repeat else player.set_repeat(False))
+      ctx.voice_client.play(player, after=lambda e: self.reseteffects(id) or self.playmusic(ctx,id,loop=self.player[id].loop) if not player.repeat else player.set_repeat(False))
       
 
+  def getoptions(self,serverId):
+    if s_opts[serverId]:
+      if s_opts[serverId][1]['temp']:
+        temp = '-af "'
+        for key in s_opts[serverId][1]['temp'].keys():
+          temp += s_opts[serverId][1]['temp'][key]
+        temp = temp[:-1] + '"'
+        return temp
+      else:
+        return ''
+    else:
+      return ''
+
+
+
+
+
   def reseteffects(self,id):
-    if self.options[id][1]['temp'] != None:
-      self.options[id][1]['temp'] = ""
+    if s_opts[id][1]['temp']:
+      s_opts[id][1]['temp'].clear()
     
   
   async def addedtoqueue(self,ctx,data,playlist,position: int):
