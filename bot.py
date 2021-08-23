@@ -15,7 +15,7 @@ async def on_ready():
 
 @bot.event
 async def on_command_error(ctx, error):
-  if isinstance(error, commands.CommandNotFound) or isinstance(error,commands.CommandInvokeError):
+  if isinstance(error, commands.CommandNotFound):# or isinstance(error,commands.CommandInvokeError):
       pass
   else:
       raise error

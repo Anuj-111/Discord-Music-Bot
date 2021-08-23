@@ -284,8 +284,6 @@ class Music(commands.Cog):
           timepassed = int(time.time()-(self.player[id].timeq[0]+self.player[id].timeq[1]))
         else:
           timepassed = int(self.player[id].timeq[2]-self.player[id].timeq[0])
-        if 'speed' in s_opts[id]['temp'].keys():
-          timepassed = int(timepassed)
         if timepassed > self.player[id].duration:
           timepassed = self.player[id].duration
         progressbar = self.progressbar(timepassed,self.player[id].duration)
