@@ -222,9 +222,7 @@ class Music(commands.Cog):
       embed.add_field(name="**Now Playing**",value="["+str(self.wslice(self.player[id].title,50))+"]("+'https://www.youtube.com/watch?v='+self.player[id].id+")`|"+self.toHMS(self.player[id].duration)+"| Requested by: "+str(self.player[id].author)+"`",inline=False)
  
       if serverId in db.keys(): 
-        songs = []
-        songs = db[serverId]
-        for value,song in enumerate(songs):
+        for value,song in enumerate(db[serverId]):
           if value == 0:
              embed.add_field(name='Rest in Queue',value=str(value+1)+")["+self.wslice(song.get('title'),50)+"]("+'https://www.youtube.com/watch?v='+song.get('id')+")`|"+self.toHMS(song.get('duration'))+"| Requested by: "+str(song.get('author'))+"`",inline = False)
           else:
@@ -324,9 +322,7 @@ class Music(commands.Cog):
       return None
     serverId = ctx.guild.id
     if serverId in db.keys():
-      songs = db[serverId]
-      random.shuffle(songs)
-      db[serverId] = songs
+      random.shuffle(db[serverId])
       await ctx.send("`Song queue has been shuffled 🔀`")
 
   @commands.command(aliases=['rp'],pass_context = True)
@@ -336,12 +332,7 @@ class Music(commands.Cog):
       return None
     serverId = ctx.guild.id
     if serverId in self.player:
-      if serverId in db[serverId]:
-        songs = db[serverId]
-      else:
-        songs = []
-      songs.insert(0,self.player[serverId].data)
-      db[serverId] = songs
+      db[serverId].insert(0,self.player[serverId].data)
       await ctx.send("Song has been requeued🔂")
 
   @commands.command(aliases=['sv'])
@@ -379,12 +370,11 @@ class Music(commands.Cog):
       await ctx.send('Use Arctic-Chan in a server please.')
       return None
     serverId = ctx.guild.id
-    songs = db[serverId]
-    if value1 < 1 or value2 < 1 or value1 > len(songs) or value2 > len(songs):
+    if value1 < 1 or value2 < 1 or value1 > len(db[serverId]) or value2 > len(db[serverId]):
       await ctx.send("Positions are out of query bounds")
     else:
-      songs[value1-1],songs[value2-1] = songs[value2-1],songs[value1-1]
-      db[serverId] = songs
+      db[serverId][value1-1],db[serverId][value2-1] = db[serverId][value2-1],db[serverId][value1-1]
+ 
   
 
               
@@ -415,10 +405,6 @@ class Music(commands.Cog):
         return 
     
     serverId = ctx.guild.id
-    if serverId in db.keys():
-        songs = db[serverId]
-    else:
-        songs = []
 
     await ctx.send("`Attempting to request "+request+"`")
     info = await Source.breakdownurl(self,request,serverId,Loop = self.bot.loop,npl=False)
@@ -437,12 +423,10 @@ class Music(commands.Cog):
     song_info = {'video':info.get('url',None),'id':info.get('id',None),'title':info.get('title',None),'duration':info.get('duration',None),'author': str(ctx.author),'ls':livestream}
 
     if serverId in self.player:
-      songs.insert(0,song_info)
+      db[serverId].insert(0,song_info)
       await self.addedtoqueue(ctx,song_info,playlist,1)
-      db[serverId] = songs
     else:
-      songs.append(song_info)
-      db[serverId] = songs
+      db[serverId].append(song_info)
       await self.addedtoqueue(ctx,song_info,playlist,0)
       self.playmusic(ctx,serverId)
 
@@ -451,20 +435,17 @@ class Music(commands.Cog):
 
     info2 = await Source.breakdownurl(self,request,serverId,Loop = self.bot.loop,npl=False)
     if serverId in db.keys():
-        songs = db[serverId]
-        if songs[0]['id'] == info.get('id',None):
-          firstsong = songs.pop(0)
+        if db[serverId][0]['id'] == info.get('id',None):
+          firstsong = db[serverId].pop(0)
     else:
-        songs = []
         firstsong = None
 
     if "entries" in info2:
       del info2["entries"][0]
       for entry in reversed(info2["entries"]):
-        songs.insert(0,{'video':entry.get('url',None),'id':entry.get('id',None),'title':entry.get('title',None),'duration':entry.get('duration',None),'author': str(ctx.author),'ls':False})
+        db[serverId].insert(0,{'video':entry.get('url',None),'id':entry.get('id',None),'title':entry.get('title',None),'duration':entry.get('duration',None),'author': str(ctx.author),'ls':False})
       if firstsong:
-        songs.insert(0,firstsong)
-      db[serverId] = songs
+        db[serverId].insert(0,firstsong)
     else:
       return None
         
@@ -500,10 +481,7 @@ class Music(commands.Cog):
         return 
     
     serverId = ctx.guild.id
-    if serverId in db.keys():
-        songs = db[serverId]
-    else:
-        songs = []
+
 
     await ctx.send("`Searching for "+request+" on Youtube`")
     info = await Source.breakdownurl(self,request,serverId,Loop = self.bot.loop)
@@ -520,9 +498,9 @@ class Music(commands.Cog):
     playlist = True if "list=" in request else False
     song_info = {'video':info.get('url',None),'id':info.get('id',None),'title':info.get('title',None),'duration':info.get('duration',None),'author': str(ctx.author),'ls':livestream}
 
-    songs.insert(0,song_info)
+    db[serverId].insert(0,song_info)
     await self.addedtoqueue(ctx,song_info,playlist,0)
-    db[serverId] = songs
+
 
     if serverId in self.player:
       if self.player[serverId].loop == True:
@@ -537,15 +515,11 @@ class Music(commands.Cog):
       return None
 
     info2 = await Source.breakdownurl(self,request,serverId,Loop = self.bot.loop,npl=False)
-    if serverId in db.keys():
-        songs = db[serverId]
-    else:
-        songs = []
+
     if "entries" in info2:
       del info2["entries"][0]
       for entry in reversed(info2["entries"]):
-         songs.insert(0,{'video':entry.get('url',None),'id':entry.get('id',None),'title':entry.get('title',None),'duration':entry.get('duration',None),'author': str(ctx.author),'ls':False})
-      db[serverId] = songs
+         db[serverId].insert(0,{'video':entry.get('url',None),'id':entry.get('id',None),'title':entry.get('title',None),'duration':entry.get('duration',None),'author': str(ctx.author),'ls':False})
     else:
       return None
       
@@ -581,11 +555,6 @@ class Music(commands.Cog):
        
 
     serverId = ctx.guild.id
-    if serverId in db.keys():
-        songs = []
-        songs = db[serverId]
-    else:
-        songs = []
 
     await ctx.send("`Attempting to request "+request+"`")
     info = await Source.breakdownurl(self,request,serverId,Loop = self.bot.loop)
@@ -603,13 +572,10 @@ class Music(commands.Cog):
     song_info = {'video':info.get('url',None),'id':info.get('id',None),'title':info.get('title',None),'duration':info.get('duration',None),'author': str(ctx.author),'ls':livestream}
    
     if serverId in self.player:
-      songs.append(song_info)
-      await self.addedtoqueue(ctx,song_info,playlist,len(songs))
-      db[serverId] = songs 
+      db[serverId].append(song_info)
+      await self.addedtoqueue(ctx,song_info,playlist,len(db[serverId]))
     else:
-      songs.append(song_info)
-      db[serverId] = songs
-      
+      db[serverId].append(song_info)
       await self.addedtoqueue(ctx,song_info,playlist,0)
       self.playmusic(ctx,serverId)
 
@@ -618,16 +584,11 @@ class Music(commands.Cog):
 
     
     info2 = await Source.breakdownurl(self,request,serverId,Loop = self.bot.loop,npl=False)
-    if serverId in db.keys():
-        songs = db[serverId]
-    else:
-        songs = []
     
     if "entries" in info2:
       del info2["entries"][0]
       for entry in info2["entries"]:
-         songs.append({'video':entry.get('url',None),'id':entry.get('id',None),'title':entry.get('title',None),'duration':entry.get('duration',None),'author': str(ctx.author),'ls':False})
-      db[serverId] = songs
+        db[serverId].append({'video':entry.get('url',None),'id':entry.get('id',None),'title':entry.get('title',None),'duration':entry.get('duration',None),'author': str(ctx.author),'ls':False})
     else:
       return None
     
@@ -698,18 +659,17 @@ class Music(commands.Cog):
       name = await guild.fetch_member(author)
       if name == None:
         return
-      songs = db[serverId]
-      maxv = len(songs)
+      maxv = len(db[serverId])
       count = 0
       i = 0
       while i < maxv:
-        if songs[i]['author'] == str(name):
-          del songs[i]
+        if db[serverId][i]['author'] == str(name):
+          del db[serverId][i]
           maxv -= 1
           count += 1      
         else:
           i += 1
-      db[serverId] = songs
+     
       await ctx.send("```css\n"+str(count)+" entries by:"+str(name.name)+" have been cleared from Queue 🧹```")
 
   @commands.command(aliases=['searc','s'],pass_context = True)
@@ -752,16 +712,10 @@ class Music(commands.Cog):
         if ytrequest['videos'][value-1]['publish_time'] == 0:
           livestream = True
         serverId = ctx.guild.id
-        if serverId in db.keys():
-          songs = db[serverId]
-        else:
-          songs = []
         if serverId in self.player:
-          songs.append({'video':info.get('url',None),'id':info.get('id',None),'title':info.get('title',None),'duration':info.get('duration',None),'author': str(ctx.author),'ls':livestream})
-          db[serverId] = songs
+          db[serverId].append({'video':info.get('url',None),'id':info.get('id',None),'title':info.get('title',None),'duration':info.get('duration',None),'author': str(ctx.author),'ls':livestream})
         else:
-          songs.append({'video':info.get('url',None),'id':info.get('id',None),'title':info.get('title',None),'duration':info.get('duration',None),'author': str(ctx.author),'ls': livestream})
-          db[serverId] = songs
+          db[serverId].append({'video':info.get('url',None),'id':info.get('id',None),'title':info.get('title',None),'duration':info.get('duration',None),'author': str(ctx.author),'ls': livestream})
           self.playmusic(ctx,serverId)
       
     except asyncio.TimeoutError:
@@ -801,6 +755,7 @@ class Music(commands.Cog):
       try:
         serverId = ctx.guild.id
         await channel.connect(timeout=60.0,reconnect=True)
+        db[serverId] = []
         s_opts[serverId] = ["",{},0]
         s_opts[serverId][1]['volume'] = 75
         s_opts[serverId][1]['temp'] = dict()
@@ -1131,9 +1086,7 @@ class Music(commands.Cog):
           nowplaying = self.player[id].data
       if not nowplaying:
         if id in db.keys() and len(db[id]) > 0:
-          songs = db[id]
-          nowplaying = songs.pop(0)
-          db[id] = songs
+          nowplaying = db[id].pop(0)
         else:
           self.player.pop(id, None)
           self.timer.setentry(id)
@@ -1202,9 +1155,8 @@ class Music(commands.Cog):
   def durationtillplay(self,id,position):
    td = 0
    if id in db.keys():
-     songs = db[id]
      for i in range(position-1):
-       td += songs[i].get('duration')
+       td += db[id][i].get('duration')
    if self.player[id].timeq[2] == 0:
      td += self.player[id].duration-(int(time.time()-(self.player[id].timeq[0]+self.player[id].timeq[1])))
    else:
