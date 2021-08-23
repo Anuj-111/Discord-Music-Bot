@@ -1086,8 +1086,9 @@ class Music(commands.Cog):
         if id in db.keys() and len(db[id]) > 0:
           nowplaying = db[id].pop(0)
         else:
-          self.player.pop(id, None)
-          self.timer.setentry(id)
+          del self.player[id]
+          if id in db.keys():
+            self.timer.setentry(id)
           return None 
           
       player = Source.streamvideo(nowplaying,loop=loop,options=self.getoptions(id))
@@ -1096,7 +1097,7 @@ class Music(commands.Cog):
       
 
   def getoptions(self,serverId):
-    if s_opts[serverId]:
+    if serverId in s_opts.keys():
       if s_opts[serverId][1]['temp']:
         temp = '-af "'
         for key in s_opts[serverId][1]['temp'].keys():
@@ -1113,8 +1114,9 @@ class Music(commands.Cog):
 
 
   def reseteffects(self,id):
-    if s_opts[id][1]['temp']:
-      s_opts[id][1]['temp'].clear()
+    if id in s_opts.keys():
+      if s_opts[id][1]['temp']:
+        s_opts[id][1]['temp'].clear()
     
   
   async def addedtoqueue(self,ctx,data,playlist,position: int):
