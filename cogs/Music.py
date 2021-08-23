@@ -284,6 +284,13 @@ class Music(commands.Cog):
           timepassed = int(time.time()-(self.player[id].timeq[0]+self.player[id].timeq[1]))
         else:
           timepassed = int(self.player[id].timeq[2]-self.player[id].timeq[0])
+        
+        if 'speed' in s_opts[id][1]['temp']:
+         if len(s_opts[id][1]['temp']['speed'])> 12:
+           timepassed = timepassed * 4
+         else:
+            timepassed = int(timepassed *float(s_opts[id][1]['temp']['speed'].split("=")[1][:-1]))
+
         if timepassed > self.player[id].duration:
           timepassed = self.player[id].duration
         progressbar = self.progressbar(timepassed,self.player[id].duration)
@@ -772,8 +779,15 @@ class Music(commands.Cog):
         timepassed = int(time.time()-(self.player[serverId].timeq[0]+self.player[serverId].timeq[1]))
       else:
         timepassed = int(self.player[serverId].timeq[2]-self.player[serverId].timeq[0])
+
+      if 'speed' in s_opts[serverId][1]['temp']:
+        if len(s_opts[serverId][1]['temp']['speed']) > 12:
+          timepassed = timepassed * 4
+        else:
+          timepassed = int(timepassed *float(s_opts[serverId][1]['temp']['speed'].split("=")[1][:-1]))
+
       if timepassed+value > self.player[serverId].duration:
-        await ctx.send("You can't rewind that far")
+        await ctx.send("You can't forward that far")
         return None
       timetoreset = [(timepassed + value), -(timepassed + value)]
 
@@ -795,6 +809,14 @@ class Music(commands.Cog):
         timepassed = int(time.time()-(self.player[serverId].timeq[0]+self.player[serverId].timeq[1]))
       else:
         timepassed = int(self.player[serverId].timeq[2]-self.player[serverId].timeq[0])
+
+      if 'speed' in s_opts[serverId][1]['temp']:
+        if len(s_opts[serverId][1]['temp']['speed'])> 12:
+          timepassed = timepassed * 4
+        else:
+          timepassed = int(timepassed *float(s_opts[serverId][1]['temp']['speed'].split("=")[1][:-1]))
+
+
       if value > timepassed:
         await ctx.send("You can't rewind that far")
         return None
@@ -841,6 +863,12 @@ class Music(commands.Cog):
       pass
     elif setting.lower() == "speed":
       if serverId in self.player and ctx.voice_client.is_playing():
+        if 'speed' in s_opts[serverId][1]['temp']:
+          if len(s_opts[serverId][1]['temp']['speed'])> 12:
+            value1 = 4.0
+          else:
+            value1 = float(s_opts[serverId][1]['temp']['speed'].split("=")[1][:-1])
+
         if not value:
           if 'speed' in s_opts[serverId][1]['temp']:
             del s_opts[serverId][1]['temp']['speed']
@@ -862,10 +890,13 @@ class Music(commands.Cog):
           timepassed = int(time.time()-(self.player[serverId].timeq[0]+self.player[serverId].timeq[1]))
         else:
           timepassed = int(self.player[serverId].timeq[2]-self.player[serverId].timeq[0])
-        tme = [timepassed,-timepassed]
-        self.player[serverId].set_repeat(True)
-        ctx.voice_client.stop()
-        self.playmusic(ctx,serverId,nowplaying=[self.player[serverId].data,tme],loop=self.player[serverId].loop)
+        if value1:
+          timepassed = int(timepassed*value1)
+        if timepassed < self.player[serverId].duration:
+          tme = [timepassed,-timepassed]
+          self.player[serverId].set_repeat(True)
+          ctx.voice_client.stop()
+          self.playmusic(ctx,serverId,nowplaying=[self.player[serverId].data,tme],loop=self.player[serverId].loop)
     elif setting.lower() == "volume" or setting.lower() == "vol":
       if not value:
         if s_opts[serverId][1]['volume'] != 0.5:
@@ -1166,10 +1197,18 @@ class Music(commands.Cog):
    if id in db:
      for i in range(position-1):
        td += db[id][i].get('duration')
-   if self.player[id].timeq[2] == 0:
-     td += self.player[id].duration-(int(time.time()-(self.player[id].timeq[0]+self.player[id].timeq[1])))
-   else:
-     td += self.player[id].duration-(int(self.player[id].timeq[2]-self.player[id].timeq[0]))
+   if id in self.player:
+    if self.player[id].timeq[2] == 0:
+      timepassed = int(time.time()-(self.player[id].timeq[0]+self.player[id].timeq[1]))
+    else:
+      timepassed = int(self.player[id].timeq[2]-self.player[id].timeq[0])
+    if 'speed' in s_opts[id][1]['temp']:
+      if len(s_opts[id][1]['temp']['speed'])> 12:
+        timepassed = timepassed * 4
+      else:
+        timepassed = int(timepassed *float(s_opts[id][1]['temp']['speed'].split("=")[1][:-1]))
+    if timepassed < self.player[id].duration:
+      td += self.player[id].duration - timepassed
    return td
     
   def toHMS(self,s):
