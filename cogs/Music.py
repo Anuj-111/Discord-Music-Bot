@@ -649,7 +649,7 @@ class Music(commands.Cog):
     author = ctx.message.content.split(" ",1)[1] if len(ctx.message.content.split(" ",1)) > 1 else None
     if author == None:
       if serverId in db and len(db[serverId]) > 0:
-        del db[serverId]
+        db[serverId].clear()
         await ctx.send("```Queue has been Cleared 🧹```")
       else:
         await ctx.send("```Nothing to Clear ¯\_(ツ)_/¯```")
@@ -894,7 +894,7 @@ class Music(commands.Cog):
         if value1:
           timepassed = int(timepassed*value1)
         if timepassed < self.player[serverId].duration:
-          tme = [timepassed*int(value^-1),-(timepassed*int(value^-1))]
+          tme = [timepassed,-(timepassed*int(value**-1))]
           self.player[serverId].set_repeat(True)
           ctx.voice_client.stop()
           self.playmusic(ctx,serverId,nowplaying=[self.player[serverId].data,tme],loop=self.player[serverId].loop)
