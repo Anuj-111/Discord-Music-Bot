@@ -194,13 +194,9 @@ class Music(commands.Cog):
         if self.player[serverId].loop == True:
           self.player[serverId].set_loop(False)
         voice.stop()
-        voice.cleanup()
-        await voice.disconnect()
-        await self.timer.delentry(ctx.guild.id)   
-      else:
-        voice.cleanup()
-        await voice.disconnect()
-        await self.timer.delentry(ctx.guild.id)   
+      voice.cleanup()
+      await voice.disconnect()
+      await self.timer.delentry(ctx.guild.id)   
     else:
       await ctx.send("**User isn't connected to Bot's voice channel or bot isn't connected**")
 
@@ -1128,8 +1124,7 @@ class Music(commands.Cog):
           nowplaying = db[id].pop(0)
         else:
           del self.player[id]
-          if id in db:
-            self.timer.setentry(id)
+          self.timer.setentry(id)
           return None 
           
       player = Source.streamvideo(nowplaying,loop=loop,options=self.getoptions(id),volume=s_opts[id][1]['volume'])
