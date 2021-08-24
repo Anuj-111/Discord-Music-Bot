@@ -790,7 +790,7 @@ class Music(commands.Cog):
       if speed == 1:
         timetoreset = [(timepassed + value), -(timepassed + value)]
       else:
-        timetoreset = [(timepassed + value), -int(timepassed + (value*(speed**-1)))]
+        timetoreset = [int((timepassed + value)*speed), -int(timepassed + (value*(speed**-1)))]
 
       self.player[serverId].set_repeat(True)
       ctx.voice_client.stop()
