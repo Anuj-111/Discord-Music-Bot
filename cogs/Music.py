@@ -870,6 +870,7 @@ class Music(commands.Cog):
           if 'speed' in s_opts[serverId][1]['temp']:
             del s_opts[serverId][1]['temp']['speed']
             await ctx.send('Speed has been reset to **1x**')
+            value = 1
         elif value.isdigit():
           if int(value) == 100:
             if 'speed' in s_opts[serverId][1]['temp']:
