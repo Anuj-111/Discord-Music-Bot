@@ -783,15 +783,14 @@ class Music(commands.Cog):
         else:
           speed = float(s_opts[serverId][1]['temp']['speed'].split("=")[1][:-1])
 
-
-      if int((timepassed+value)*speed) > self.player[serverId].duration:
+      if timepassed+value > self.player[serverId].duration:
         await ctx.send("You can't forward that far")
         return None
     
       if not speed:
         timetoreset = [(timepassed + value), -(timepassed + value)]
       else:
-        timetoreset = [ int((timepassed + value)*speed), -int(timepassed + (value*(speed**-1)))]
+        timetoreset = [int(timepassed + (value*(speed**-1))), -int(timepassed + (value*(speed**-1)))]
 
       self.player[serverId].set_repeat(True)
       ctx.voice_client.stop()
