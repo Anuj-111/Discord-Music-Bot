@@ -891,9 +891,10 @@ class Music(commands.Cog):
           timepassed = int(time.time()-(self.player[serverId].timeq[0]+self.player[serverId].timeq[1]))
         else:
           timepassed = int(self.player[serverId].timeq[2]-self.player[serverId].timeq[0])
-
+        if value1:
+          timepassed = int(timepassed*value1)
         if timepassed < self.player[serverId].duration:
-          tme = [timepassed*value1,-(timepassed*int(value1**-1))]
+          tme = [timepassed,-int(timepassed*(value**-1))]
           self.player[serverId].set_repeat(True)
           ctx.voice_client.stop()
           self.playmusic(ctx,serverId,nowplaying=[self.player[serverId].data,tme],loop=self.player[serverId].loop)
