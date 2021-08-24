@@ -776,18 +776,18 @@ class Music(commands.Cog):
       else:
         timepassed = int(self.player[serverId].timeq[2]-self.player[serverId].timeq[0])
 
-      speed = None
+      speed = 1
       if 'speed' in s_opts[serverId][1]['temp']:
         if len(s_opts[serverId][1]['temp']['speed']) > 12:
           speed = 4
         else:
           speed = float(s_opts[serverId][1]['temp']['speed'].split("=")[1][:-1])
 
-      if timepassed+value > self.player[serverId].duration:
+      if int(timepassed*speed+value) > self.player[serverId].duration:
         await ctx.send("You can't forward that far")
         return None
     
-      if not speed:
+      if speed == 1:
         timetoreset = [(timepassed + value), -(timepassed + value)]
       else:
         timetoreset = [(timepassed + value), -int(timepassed + (value*(speed**-1)))]
@@ -811,17 +811,21 @@ class Music(commands.Cog):
       else:
         timepassed = int(self.player[serverId].timeq[2]-self.player[serverId].timeq[0])
 
+      speed = 1
       if 'speed' in s_opts[serverId][1]['temp']:
-        if len(s_opts[serverId][1]['temp']['speed'])> 12:
-          timepassed = timepassed * 4
+        if len(s_opts[serverId][1]['temp']['speed']) > 12:
+          speed = 4
         else:
-          timepassed = int(timepassed *float(s_opts[serverId][1]['temp']['speed'].split("=")[1][:-1]))
+          speed = float(s_opts[serverId][1]['temp']['speed'].split("=")[1][:-1])
 
-
-      if value > timepassed:
+      if value > timepassed*speed:
         await ctx.send("You can't rewind that far")
         return None
-      timetoreset = [timepassed - value, -(timepassed - value)]
+        
+      if speed == 1:
+        timetoreset = [(timepassed - value), -(timepassed - value)]
+      else:
+        timetoreset = [(timepassed - value), -int(timepassed - (value*(speed**-1)))]
       self.player[serverId].set_repeat(True)
       ctx.voice_client.stop()
       self.playmusic(ctx,serverId,nowplaying=[self.player[serverId].data,timetoreset],loop=self.player[serverId].loop)
