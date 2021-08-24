@@ -875,6 +875,7 @@ class Music(commands.Cog):
             if 'speed' in s_opts[serverId][1]['temp']:
               del s_opts[serverId][1]['temp']['speed']
               await ctx.send("Speed has bas been reset to **1x**")
+              value = 1
             else:
               return None
           value = (min(max(50,int(value)),200)/100.0)
@@ -883,6 +884,9 @@ class Music(commands.Cog):
         elif value == "pog":
           s_opts[serverId][1]['temp']['speed'] = 'atempo=2.0,atempo=2.0,'
           await ctx.send(f'Speed has been reset to **POGGERS(4x)**')
+          value = 4
+        else:
+          return None
         if self.player[serverId].timeq[2] == 0:
           timepassed = int(time.time()-(self.player[serverId].timeq[0]+self.player[serverId].timeq[1]))
         else:
@@ -890,7 +894,7 @@ class Music(commands.Cog):
         if value1:
           timepassed = int(timepassed*value1)
         if timepassed < self.player[serverId].duration:
-          tme = [timepassed*(value^-1),-(timepassed*(value^-1))]
+          tme = [timepassed*int(value^-1),-(timepassed*int(value^-1))]
           self.player[serverId].set_repeat(True)
           ctx.voice_client.stop()
           self.playmusic(ctx,serverId,nowplaying=[self.player[serverId].data,tme],loop=self.player[serverId].loop)
