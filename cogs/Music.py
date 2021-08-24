@@ -43,7 +43,7 @@ class Timer():
         if self.check2:
           if str(now.minute) in self.check2:
             for serverId in self.check2[str(now.minute)]:
-              guild = await self.bot.fetch_guild(i)
+              guild = await self.bot.fetch_guild(serverId)
               voice = discord.utils.get(self.bot.voice_clients, guild=guild)
               if voice and len(voice.channel.members) == 1:
                 if serverId in db:
