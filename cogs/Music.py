@@ -778,9 +778,9 @@ class Music(commands.Cog):
 
       if 'speed' in s_opts[serverId][1]['temp']:
         if len(s_opts[serverId][1]['temp']['speed']) > 12:
-          timepassed = timepassed * 4
+          timepassed = timepassed * 0.25
         else:
-          timepassed = int(timepassed *float(s_opts[serverId][1]['temp']['speed'].split("=")[1][:-1]))
+          timepassed = int(timepassed * (float(s_opts[serverId][1]['temp']['speed'].split("=")[1][:-1]) ** -1))
 
       if timepassed+value > self.player[serverId].duration:
         await ctx.send("You can't forward that far")
@@ -808,9 +808,9 @@ class Music(commands.Cog):
 
       if 'speed' in s_opts[serverId][1]['temp']:
         if len(s_opts[serverId][1]['temp']['speed'])> 12:
-          timepassed = timepassed * 4
+          timepassed = timepassed * 0.25
         else:
-          timepassed = int(timepassed *float(s_opts[serverId][1]['temp']['speed'].split("=")[1][:-1]))
+          timepassed = int(timepassed * (float(s_opts[serverId][1]['temp']['speed'].split("=")[1][:-1]) ** -1))
 
 
       if value > timepassed:
