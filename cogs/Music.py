@@ -20,6 +20,7 @@ class Timer():
     def __init__(self,bot):
         self.bot = bot
         self.check = dict()
+        self.check2 = dict()
         
     async def delentry(self,serverId):
         for key in self.check:
@@ -27,22 +28,42 @@ class Timer():
                 del self.check[key][serverId]
             
     async def checktimer(self):
+        tme = time.time()
         now = datetime.datetime.now()
         if self.check:
-            if str(now.minute) in self.check:
-                for i in self.check[str(now.minute)]:
-                    del s_opts[i]
-                    guild = await self.bot.fetch_guild(i)
-                    voice = discord.utils.get(self.bot.voice_clients, guild=guild)
+          if str(now.minute) in self.check:
+              for i in self.check[str(now.minute)]:
+                  del s_opts[i]
+                  guild = await self.bot.fetch_guild(i)
+                  voice = discord.utils.get(self.bot.voice_clients, guild=guild)
+                  if voice:
                     voice.cleanup()
                     await voice.disconnect()
-                del self.check[str(now.minute)]
+              del self.check[str(now.minute)]
+        if self.check2:
+          if str(now.minute) in self.check2:
+            for serverId in self.check2[str(now.minute)]:
+              guild = await self.bot.fetch_guild(i)
+              voice = discord.utils.get(self.bot.voice_clients, guild=guild)
+              if voice and len(voice.channel.members) == 1:
+                if serverId in db:
+                  del db[serverId]
+                del s_opts[serverId]
+              
+                if serverId in self.player:
+                  if self.player[serverId].loop:
+                    self.player[serverId].set_loop(False)
+                  voice.stop()
+                voice.cleanup()
+                await voice.disconnect()
+            del self.check2[str(now.minute)]
                
-        await asyncio.sleep(60)
+        await asyncio.sleep(60-(time.time()-tme))
         await self.checktimer()
                     
   
-    def setentry(self,serverId):
+    def setentry(self,serverId,entryid):
+      if entryid == 1:
         now = datetime.datetime.now()
         minute = now.minute + 3 if now.second < 30 else now.minute + 4
         if minute >= 60:
@@ -52,6 +73,17 @@ class Timer():
         else:
             self.check[str(minute)] = {}
             self.check[str(minute)][serverId] = True
+      elif entryid == 2:
+        now = datetime.datetime.now()
+        minute = now.minute + 4 if now.second < 30 else now.minute + 5
+        if minute >= 60:
+            minute -= 60
+        if minute in self.check2:
+            self.check2[str(minute)][serverId] = True
+        else:
+            self.check2[str(minute)] = {}
+            self.check2[str(minute)][serverId] = True
+
 
       
 class Source(discord.PCMVolumeTransformer):
@@ -138,22 +170,7 @@ class Music(commands.Cog):
     if before.channel and not after.channel:
       voice = discord.utils.get(self.bot.voice_clients, guild=ctx.guild)
       if voice and len(voice.channel.members) == 1:
-        await asyncio.sleep(180)
-        voice = discord.utils.get(self.bot.voice_clients, guild=ctx.guild)
-        if voice and len(voice.channel.members) == 1:
-          serverId = ctx.guild.id
-          if serverId in db:
-            del db[serverId]
-            del s_opts[serverId]
-        
-          if serverId in self.player:
-            if self.player[serverId].loop:
-              self.player[serverId].set_loop(False)
-            voice.stop()
-          voice.cleanup()
-          await voice.disconnect()
-          await self.timer.delentry(ctx.guild.id) 
-
+       self.timer.setentry(ctx.guild.id,2)
 
   @commands.Cog.listener()
   async def on_command_completion(self,ctx):
@@ -177,7 +194,7 @@ class Music(commands.Cog):
     channel = await self.checkconditions(ctx,voice)
     if channel == None:
       return
-    self.timer.setentry(ctx.guild.id)
+    self.timer.setentry(ctx.guild.id,1)
     
   @commands.command(aliases=['leav','dc','leave','stop'],pass_context = True)
   async def disconnect(self,ctx):
@@ -1138,7 +1155,7 @@ class Music(commands.Cog):
           nowplaying = db[id].pop(0)
         else:
           del self.player[id]
-          self.timer.setentry(id)
+          self.timer.setentry(id,1)
           return None 
           
       player = Source.streamvideo(nowplaying,loop=loop,options=self.getoptions(id),volume=s_opts[id][1]['volume'])
