@@ -776,18 +776,21 @@ class Music(commands.Cog):
       else:
         timepassed = int(self.player[serverId].timeq[2]-self.player[serverId].timeq[0])
 
+      speed = None
       if 'speed' in s_opts[serverId][1]['temp']:
         if len(s_opts[serverId][1]['temp']['speed']) > 12:
-          timepassed = timepassed * 0.25
-          value = int(value * 0.25)
+          speed = 0.25
         else:
-          timepassed = int(timepassed * (float(s_opts[serverId][1]['temp']['speed'].split("=")[1][:-1]) ** -1))
-          value = int(value * (float(s_opts[serverId][1]['temp']['speed'].split("=")[1][:-1]) ** -1))
+          speed = (float(s_opts[serverId][1]['temp']['speed'].split("=")[1][:-1])**-1)
 
       if timepassed+value > self.player[serverId].duration:
         await ctx.send("You can't forward that far")
         return None
-      timetoreset = [(timepassed + value), -(timepassed + value)]
+    
+      if not speed:
+        timetoreset = [(timepassed + value), -(timepassed + value)]
+      else:
+        timetoreset = [(timepassed + value), -int(timepassed + (value*speed))]
 
       self.player[serverId].set_repeat(True)
       ctx.voice_client.stop()
@@ -810,11 +813,9 @@ class Music(commands.Cog):
 
       if 'speed' in s_opts[serverId][1]['temp']:
         if len(s_opts[serverId][1]['temp']['speed'])> 12:
-          timepassed = timepassed * 0.25
-          value = int(value * 0.25)
+          timepassed = timepassed * 4
         else:
-          timepassed = int(timepassed * (float(s_opts[serverId][1]['temp']['speed'].split("=")[1][:-1]) ** -1))
-          value = int(value * (float(s_opts[serverId][1]['temp']['speed'].split("=")[1][:-1]) ** -1))
+          timepassed = int(timepassed *float(s_opts[serverId][1]['temp']['speed'].split("=")[1][:-1]))
 
 
       if value > timepassed:
