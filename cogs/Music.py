@@ -905,9 +905,10 @@ class Music(commands.Cog):
               value = 1
             else:
               return None
-          value = (min(max(50,int(value)),200)/100.0)
-          s_opts[serverId][1]['temp']['speed'] = f'atempo={value},'
-          await ctx.send(f'Speed has been reset to **{value}x**')
+          else:
+            value = (min(max(50,int(value)),200)/100.0)
+            s_opts[serverId][1]['temp']['speed'] = f'atempo={value},'
+            await ctx.send(f'Speed has been reset to **{value}x**')
         elif value == "pog":
           s_opts[serverId][1]['temp']['speed'] = 'atempo=2.0,atempo=2.0,'
           await ctx.send(f'Speed has been reset to **POGGERS(4x)**')
