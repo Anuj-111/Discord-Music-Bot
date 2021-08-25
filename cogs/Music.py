@@ -170,7 +170,8 @@ class Music(commands.Cog):
   async def on_voice_state_update(self,ctx,before,after):
     if before.channel and not after.channel:
       voice = discord.utils.get(self.bot.voice_clients, guild=ctx.guild)
-      if not voice or not voice.is_connected():
+      if not voice.is_connected():
+        voice.cleanup()
         if ctx.guild.id in db:
           del db[ctx.guild.id]
           del s_opts[ctx.guild.id]
