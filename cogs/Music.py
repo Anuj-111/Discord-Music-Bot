@@ -48,7 +48,7 @@ class Timer():
               if voice and len(voice.channel.members) == 1:
                 if serverId in db:
                   del db[serverId]
-                del s_opts[serverId]
+                  del s_opts[serverId]
               
                 if serverId in self.player:
                   if self.player[serverId].loop:
@@ -171,6 +171,13 @@ class Music(commands.Cog):
       voice = discord.utils.get(self.bot.voice_clients, guild=ctx.guild)
       if voice and len(voice.channel.members) == 1:
        self.timer.setentry(ctx.guild.id,2)
+      elif not voice:
+        if ctx.guild.id in db:
+          del db[ctx.guild.id]
+          del s_opts[ctx.guild.id]
+        if ctx.guild.id in self.player:
+          self.player[ctx.guild.id] = None
+        await self.timer.delentry(ctx.guild.id)   
 
   @commands.Cog.listener()
   async def on_command_completion(self,ctx):
