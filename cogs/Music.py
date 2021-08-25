@@ -33,12 +33,13 @@ class Timer():
         if self.check:
           if str(now.minute) in self.check:
               for i in self.check[str(now.minute)]:
+                if i in s_opts:
                   del s_opts[i]
-                  guild = await self.bot.fetch_guild(i)
-                  voice = discord.utils.get(self.bot.voice_clients, guild=guild)
-                  if voice:
-                    voice.cleanup()
-                    await voice.disconnect()
+                guild = await self.bot.fetch_guild(i)
+                voice = discord.utils.get(self.bot.voice_clients, guild=guild)
+                if voice:
+                  voice.cleanup()
+                  await voice.disconnect()
               del self.check[str(now.minute)]
         if self.check2:
           if str(now.minute) in self.check2:
@@ -169,15 +170,15 @@ class Music(commands.Cog):
   async def on_voice_state_update(self,ctx,before,after):
     if before.channel and not after.channel:
       voice = discord.utils.get(self.bot.voice_clients, guild=ctx.guild)
-      if voice and len(voice.channel.members) == 1:
-       self.timer.setentry(ctx.guild.id,2)
-      elif not voice:
+      if not voice or not voice.is_connected():
         if ctx.guild.id in db:
           del db[ctx.guild.id]
           del s_opts[ctx.guild.id]
-        if ctx.guild.id in self.player:
-          self.player[ctx.guild.id] = None
         await self.timer.delentry(ctx.guild.id)   
+      elif voice and len(voice.channel.members) == 1:
+       self.timer.setentry(ctx.guild.id,2)
+      
+       
 
   @commands.Cog.listener()
   async def on_command_completion(self,ctx):
@@ -1152,8 +1153,16 @@ class Music(commands.Cog):
       if nowplaying:
         player = Source.streamvideo(nowplaying[0],loop=loop,ss=nowplaying[1],options=self.getoptions(id),volume=s_opts[id][1]['volume'])
         self.player[id] = player
-        ctx.voice_client.play(player, after=lambda e: self.reseteffects(id) or self.playmusic(ctx,id,loop=self.player[id].loop) if not player.repeat else player.set_repeat(False))
-        return None
+        try:
+          ctx.voice_client.play(player, after=lambda e: self.reseteffects(id) or self.playmusic(ctx,id,loop=self.player[id].loop) if not player.repeat else player.set_repeat(False))
+          return None
+        except Exception:
+          if not player.repeat:
+            self.reseteffects(id) 
+            self.playmusic(ctx,id,loop=self.player[id].loop)
+          else:
+            player.set_repeat(False)
+          return None
       if id in self.player:
         if self.player[id].loop == True:
           loop = True
@@ -1168,8 +1177,15 @@ class Music(commands.Cog):
           
       player = Source.streamvideo(nowplaying,loop=loop,options=self.getoptions(id),volume=s_opts[id][1]['volume'])
       self.player[id] = player
-      ctx.voice_client.play(player, after=lambda e: self.reseteffects(id) or self.playmusic(ctx,id,loop=self.player[id].loop) if not player.repeat else player.set_repeat(False))
-      
+      try:
+        ctx.voice_client.play(player, after=lambda e: self.reseteffects(id) or self.playmusic(ctx,id,loop=self.player[id].loop) if not player.repeat else player.set_repeat(False))
+      except Exception:
+        if not player.repeat:
+          self.reseteffects(id) 
+          self.playmusic(ctx,id,loop=self.player[id].loop)
+        else:
+          player.set_repeat(False)
+        return None
 
   def getoptions(self,serverId):
     if serverId in s_opts:
