@@ -189,7 +189,8 @@ class Music(commands.Cog):
 
   @commands.command(aliases=['h'],pass_context= True)
   async def help(self,ctx):
-    embed = discord.Embed(title="Google Docs documentation",description="**[Link to documentation](https://docs.google.com/document/d/16XDQXf9HHq-pNXUerNMLvNLZi67ERfcR795S9Qw1snI/edit?usp=sharing)**",colour= random.randint(0, 0xffffff))
+    embed = discord.Embed(title="Google Docs documentation",description="**[Link to documentation](https://1pt.co/music)**",colour= random.randint(0, 0xffffff))
+    embed.add_field(name='\u200b',value="Made by:[Param Thakkar](https://https://www.param.me/)",inline=False)
     embed.set_author(name="Arctic Chan",icon_url=self.bot.user.avatar_url)
     await ctx.send(embed=embed)
   
@@ -363,7 +364,7 @@ class Music(commands.Cog):
       await ctx.send("Song has been requeued🔂")
 
   @commands.command(aliases=['sv'])
-  async def save(self,ctx,member: discord.Member):
+  async def save(self,ctx):
     if isinstance(ctx.channel, discord.DMChannel):
       await ctx.send('Use Arctic-Chan in a server please.')
       return None
@@ -372,7 +373,7 @@ class Music(commands.Cog):
     if serverId in self.player:
       embed = discord.Embed(title="**["+self.duration[serverId].title+"]"+"("+'https://www.youtube.com/watch?v='+self.duration[serverId].id+")**",description = "```Song requested by: "+self.duration[serverId].author+"||"+self.toHMS(self.duration[serverId].duration),colour = 0xffa826)
       embed.set_footer(text="`Saved by Arctic Chan in "+ctx.guild+" at "+str(ctx.message.created_at)+"`")
-      user = await member.create_dm()
+      user = await ctx.author.create_dm()
       await user.send(embed=embed)
 
   @commands.command(aliases=['vol'])
@@ -1055,7 +1056,7 @@ class Music(commands.Cog):
           message.delete()
           return None
         elif err == SessionFinished:
-          break
+          break 
     if options == 1:
       embed = discord.Embed(title='Please send a message in this exact format',colour=0x02C1ff)
       embed.add_field(name="**1)Enter preamp value**",value="start off your message with preamp value and seperate by |")
