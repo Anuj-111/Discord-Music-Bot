@@ -190,7 +190,7 @@ class Music(commands.Cog):
   @commands.command(aliases=['h'],pass_context= True)
   async def help(self,ctx):
     embed = discord.Embed(title="Google Docs documentation",description="**[Link to documentation](https://1pt.co/music)**",colour= random.randint(0, 0xffffff))
-    embed.add_field(name='\u200b',value="Made by:[Param Thakkar](https://https://www.param.me/)",inline=False)
+    embed.add_field(name='\u200b',value="Made by:[Param Thakkar](https://www.param.me/)",inline=False)
     embed.set_author(name="Arctic Chan",icon_url=self.bot.user.avatar_url)
     await ctx.send(embed=embed)
   
