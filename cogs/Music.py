@@ -6,7 +6,7 @@ from discord.channel import VoiceChannel
 import youtube_dl
 from youtube_dl import DownloadError
 import discord
-from discord.ext import commands
+from discord.ext import commands,tasks
 from youtube_search import YoutubeSearch 
 import datetime
 
@@ -26,7 +26,9 @@ class Timer():
         for key in self.check:
             if serverId in self.check[key]:
                 del self.check[key][serverId]
-            
+
+
+    @tasks.loop(seconds=60) 
     async def checktimer(self):
         tme = time.time()
         now = datetime.datetime.now()
@@ -58,9 +60,7 @@ class Timer():
                 voice.cleanup()
                 await voice.disconnect()
             del self.check2[str(now.minute)]
-               
-        await asyncio.sleep(60-(time.time()-tme))
-        await self.checktimer()
+              
                     
   
     def setentry(self,serverId,entryid):
@@ -164,7 +164,7 @@ class Music(commands.Cog):
   async def on_ready(self):
     now = datetime.datetime.now()
     await asyncio.sleep(60-now.second)
-    await self.timer.checktimer()
+    await self.timer.checktimer.start()
   
   @commands.Cog.listener()
   async def on_voice_state_update(self,ctx,before,after):
