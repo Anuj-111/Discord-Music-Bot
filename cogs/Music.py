@@ -164,7 +164,7 @@ class Music(commands.Cog):
   async def on_ready(self):
     now = datetime.datetime.now()
     await asyncio.sleep(60-now.second)
-    await self.timer.checktimer.start()
+    self.timer.checktimer.start()
   
   @commands.Cog.listener()
   async def on_voice_state_update(self,ctx,before,after):
