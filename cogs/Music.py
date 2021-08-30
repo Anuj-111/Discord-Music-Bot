@@ -788,7 +788,7 @@ class Music(commands.Cog):
         await channel.connect(timeout=60.0,reconnect=True)
         db[serverId] = []
         s_opts[serverId] = ["",{},0]
-        s_opts[serverId][1]['volume'] = 0.5
+        s_opts[serverId][1]['volume'] = 0.75
         s_opts[serverId][1]['temp'] = dict()
       except asyncio.TimeoutError:
         await ctx.send('bot has disconnected')
@@ -823,8 +823,9 @@ class Music(commands.Cog):
         timetoreset = [int((timepassed*speed) + value), -int(timepassed + (value*(speed**-1)))]
 
       self.player[serverId].set_repeat(True)
+      volume = ctx.voice_client.source.volume
       ctx.voice_client.stop()
-      self.playmusic(ctx,serverId,nowplaying=[self.player[serverId].data,timetoreset],loop=self.player[serverId].loop)
+      self.playmusic(ctx,serverId,nowplaying=[self.player[serverId].data,timetoreset],loop=self.player[serverId].loop,volume=volume)
       await ctx.send('**Song has been forwarded '+str(value)+' seconds**')
     else:
      await ctx.send("No song is being played in server vc")
@@ -857,8 +858,9 @@ class Music(commands.Cog):
       else:
         timetoreset = [(timepassed - value), -int(timepassed - (value*(speed**-1)))]
       self.player[serverId].set_repeat(True)
+      volume = ctx.voice_client.source.volume
       ctx.voice_client.stop()
-      self.playmusic(ctx,serverId,nowplaying=[self.player[serverId].data,timetoreset],loop=self.player[serverId].loop)
+      self.playmusic(ctx,serverId,nowplaying=[self.player[serverId].data,timetoreset],loop=self.player[serverId].loop,volume=volume)
       await ctx.send('**Song has been rewinded '+str(value)+' seconds**')
     else:
       await ctx.send("No song is being played in server vc")
@@ -937,13 +939,14 @@ class Music(commands.Cog):
         if timepassed < self.player[serverId].duration:
           tme = [timepassed,-int(timepassed*(value**-1))]
           self.player[serverId].set_repeat(True)
+          volume = ctx.voice_client.source.volume
           ctx.voice_client.stop()
-          self.playmusic(ctx,serverId,nowplaying=[self.player[serverId].data,tme],loop=self.player[serverId].loop)
+          self.playmusic(ctx,serverId,nowplaying=[self.player[serverId].data,tme],loop=self.player[serverId].loop,volume=volume)
     elif setting.lower() == "volume" or setting.lower() == "vol":
       if not value:
-        if s_opts[serverId][1]['volume'] != 0.5:
-          s_opts[serverId][1]['volume'] = 0.5
-          await ctx.send("Default volume has been reset to 50%")
+        if s_opts[serverId][1]['volume'] != 0.75:
+          s_opts[serverId][1]['volume'] = 0.75
+          await ctx.send("Default volume has been reset to 75%")
       if value.isdigit():
         value = min(max(25,int(value)),250)
         value = value/100
@@ -1154,9 +1157,9 @@ class Music(commands.Cog):
     """
 
        
-  def playmusic(self,ctx,id,nowplaying=None,loop=False):
+  def playmusic(self,ctx,id,nowplaying=None,loop=False,volume=None):
       if nowplaying:
-        player = Source.streamvideo(nowplaying[0],loop=loop,ss=nowplaying[1],options=self.getoptions(id),volume=s_opts[id][1]['volume'])
+        player = Source.streamvideo(nowplaying[0],loop=loop,ss=nowplaying[1],options=self.getoptions(id),volume=volume)
         self.player[id] = player
         try:
           ctx.voice_client.play(player, after=lambda e: self.reseteffects(id) or self.playmusic(ctx,id,loop=self.player[id].loop) if not player.repeat else player.set_repeat(False))
