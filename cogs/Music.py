@@ -52,11 +52,8 @@ class Timer():
                 if serverId in db:
                   del db[serverId]
                   del s_opts[serverId]
-              
-                if serverId in self.player:
-                  if self.player[serverId].loop:
-                    self.player[serverId].set_loop(False)
-                  voice.stop()
+      
+                voice.stop()
                 voice.cleanup()
                 await voice.disconnect()
             del self.check2[str(now.minute)]
@@ -175,10 +172,16 @@ class Music(commands.Cog):
         if ctx.guild.id in db:
           del db[ctx.guild.id]
           del s_opts[ctx.guild.id]
+        if ctx.guild.id in self.player:
+          if self.player[ctx.guild.id].loop:
+            self.player[ctx.guild.id].set_loop(False)
         await self.timer.delentry(ctx.guild.id)   
       elif voice and len(voice.channel.members) == 1:
-       self.timer.setentry(ctx.guild.id,2)
-      
+        if ctx.guild.id in self.player:
+          if self.player[ctx.guild.id].loop:
+            self.player[ctx.guild.id].set_loop(False)
+        self.timer.setentry(ctx.guild.id,2)
+    
        
 
   @commands.Cog.listener()
@@ -387,7 +390,7 @@ class Music(commands.Cog):
     serverId = ctx.guild.id
     if serverId in self.player:
       voice = discord.utils.get(self.bot.voice_clients, guild=ctx.guild)
-      voice.source.volume = volume / 250
+      voice.source.volume = volume / 100
       await ctx.send(f"Volume for this song has been adjusted {volume}%")
     else:
       await ctx.send("Audio source is not connected to channel.")
@@ -940,10 +943,10 @@ class Music(commands.Cog):
       if not value:
         if s_opts[serverId][1]['volume'] != 0.5:
           s_opts[serverId][1]['volume'] = 0.5
-          await ctx.send("Default volume has been reset to 125%")
+          await ctx.send("Default volume has been reset to 50%")
       if value.isdigit():
         value = min(max(25,int(value)),250)
-        value = value/250
+        value = value/100
         s_opts[serverId][1]['volume'] = value
         await ctx.send(f'Default volume has been set to {value}')
 
