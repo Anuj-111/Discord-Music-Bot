@@ -167,7 +167,7 @@ class Music(commands.Cog):
   async def on_voice_state_update(self,ctx,before,after):
     if before.channel and not after.channel:
       voice = discord.utils.get(self.bot.voice_clients, guild=ctx.guild)
-      if not voice.is_connected():
+      if voice and not voice.is_connected():
         voice.cleanup()
         if ctx.guild.id in db:
           del db[ctx.guild.id]
@@ -952,7 +952,13 @@ class Music(commands.Cog):
         value = value/100
         s_opts[serverId][1]['volume'] = value
         await ctx.send(f'Default volume has been set to {value}')
-
+    elif setting.lower() == "8d":
+      if '8d' in s_opts[serverId][1]['temp']:
+        del s_opts[serverId][1]['temp']['8d']
+        await ctx.send("8d sound effect turned off")
+      else:
+        s_opts[serverId][1]['temp']['8d'] = 'apulsator=hz=0.125,'
+        await ctx.send("8d sound effect turned on")
       
     elif setting.lower() == "adveq":
       eqsets = discord.Embed(title=f"{self.bot.user.name}'s equalization",description='Pick from 5 standard presets or make your own by clicking the + button. If you are creating your own presets please prepare your settings beforehand. You can find info on the eq settings you can set in ```!opts eqinfo```.',colour=0x02C1ff)
