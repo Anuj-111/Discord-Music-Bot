@@ -10,6 +10,10 @@ from discord.ext import commands,tasks
 from youtube_search import YoutubeSearch 
 import datetime
 
+from discord.ext import commands
+import lyricsgenius
+genius = lyricsgenius.Genius("6U9CZ_uiDd6jCu7aLHD1Muc5JfDzy1FOueTIx4hrU4gHVxSwFBvHYEjLfWebxz7o")
+
 class SessionFinished(Exception):
   pass
 
@@ -887,8 +891,6 @@ class Music(commands.Cog):
       ctx.voice_client.play(discord.FFmpegPCMAudio("./testfile/UXgSy7Q1McY.mp3", **ffmpeg_options),after=lambda e: print("Done"))
       ctx.voice_client.source.volume = 0.5
       
-
-
   
   @commands.command(aliases=['options','settings'],pass_context = True)
   async def opts(self,ctx,setting: str,*,value=None):
@@ -985,6 +987,25 @@ class Music(commands.Cog):
       eqsets.add_field(name="Please Note:",value="Only create custom presets if you know what you're doing. Faulty presets may cause audio clipping and **damage your audio equipment.**",inline=False)
       eqsets.add_field(name='5 Standard presets:',value='1)Bass Boost, 2)High Boost, 3)Classic, 4)Vocal, 5)Rock')
       await self.seteq1(ctx,eqsets)
+
+
+  @commands.command(pass_context = True)
+  async def lyrics(self,ctx,*,word):
+    songs = genius.search_songs(word)
+    if songs:
+      song = songs['hits'][0]['result']
+      title = song.get('title',None) or song.get('title_with_featured',None) or "Nothing"
+      url = song.get('url',None)
+      lyrics =  genius.lyrics(song_url=url)
+      embed = discord.Embed(title=title,description=lyrics[:4096])
+      embed.set_thumbnail(url=song['song_art_image_thumbnail_url'])
+      embed.set_footer(text="Requested by:"+str(ctx.author.name))
+      await ctx.send(embed=embed)
+    else:
+      await ctx.send("No lyrics found in genius database")
+
+
+
 
   """
   async def seteq1(self,ctx,content):20
