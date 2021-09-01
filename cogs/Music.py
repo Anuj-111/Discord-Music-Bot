@@ -459,10 +459,10 @@ class Music(commands.Cog):
 
     if serverId in self.player:
       db[serverId].insert(0,song_info)
-      await self.addedtoqueue(ctx,song_info,playlist,1)
+      await self.addedtoqueue(ctx,song_info,playlist,1,thumbnail=info.get('thumbnail',None))
     else:
       db[serverId].append(song_info)
-      await self.addedtoqueue(ctx,song_info,playlist,0)
+      await self.addedtoqueue(ctx,song_info,playlist,0,thumbnail=info.get('thumbnail',None))
       self.playmusic(ctx,serverId)
 
     if not playlist:
@@ -534,7 +534,7 @@ class Music(commands.Cog):
     song_info = {'video':info.get('url',None),'id':info.get('id',None),'title':info.get('title',None),'duration':info.get('duration',None),'author': str(ctx.author),'ls':livestream}
 
     db[serverId].insert(0,song_info)
-    await self.addedtoqueue(ctx,song_info,playlist,0)
+    await self.addedtoqueue(ctx,song_info,playlist,0,thumbnail=info.get('thumbnail',None))
 
 
     if serverId in self.player:
@@ -608,10 +608,10 @@ class Music(commands.Cog):
    
     if serverId in self.player:
       db[serverId].append(song_info)
-      await self.addedtoqueue(ctx,song_info,playlist,len(db[serverId]))
+      await self.addedtoqueue(ctx,song_info,playlist,len(db[serverId]),thumbnail=info.get('thumbnail',None))
     else:
       db[serverId].append(song_info)
-      await self.addedtoqueue(ctx,song_info,playlist,0)
+      await self.addedtoqueue(ctx,song_info,playlist,0,thumbnail=info.get('thumbnail',None))
       self.playmusic(ctx,serverId)
 
     if not playlist:
@@ -1259,16 +1259,13 @@ class Music(commands.Cog):
       return ''
 
 
-
-
-
   def reseteffects(self,id):
     if id in s_opts:
       if s_opts[id][1]['temp']:
         s_opts[id][1]['temp'].clear()
     
   
-  async def addedtoqueue(self,ctx,data,playlist,position: int):
+  async def addedtoqueue(self,ctx,data,playlist,position: int,thumbnail=None):
     serverId = ctx.guild.id
     if position == 0:
       position = "Currently Playing"
@@ -1287,14 +1284,16 @@ class Music(commands.Cog):
       notif.add_field(name="Till Played",value=dtp if not data.get('ls') and dtp else "livestream" ,inline=True)
       notif.add_field(name="Song Duration",value=duration if not data.get('ls') else "livestream",inline=True)
       notif.add_field(name="Position",value=position,inline=False)
-      notif.set_thumbnail(url="http://img.youtube.com/vi/%s/0.jpg" % data.get('id'))
+      if thumbnail:
+        notif.set_thumbnail(url=thumbnail)
       
     else:
       notif = discord.Embed(title="Playlist added/being added to queue",description="**["+data.get('title')+"](https://www.youtube.com/watch?v="+data.get('id')+")**",colour= random.randint(0, 0xffffff))
       notif.add_field(name="**Till Played**",value="`"+dtp+"`",inline=True)
       notif.add_field(name="**Song Duration**",value="`"+duration+"`",inline=True)
       notif.add_field(name="**Position**",value=position,inline=False)
-      notif.set_thumbnail(url="http://img.youtube.com/vi/%s/0.jpg" % data.get('id'))
+      if thumbnail:
+        notif.set_thumbnail(url=thumbnail)
       notif.set_footer(text="`Playlist info may take some time.`")
     await ctx.send(embed=notif)
 
@@ -1368,48 +1367,6 @@ class Music(commands.Cog):
       shutil.rmtree('./download/'+authorId)
       break
     
-
-    
-      
-
-
-  
-    
-    ##await ctx.send(f'Now playing: {player.title}')      if os.path.exists("./"+id+"/"+str(self.player[id].id)+".webp"):os.remove("./"+id+"/"+str(self.player[id].id)+".webp")
-
-  #def notifyq(self,title,thumbnail,url,duration,)
-
-
-  """
-  ydl_opts = {
-
-    'format': 'bestaudio/best',
-    'noplaylist': True,
-    'postprocessors': [{
-        'key': 'FFmpegExtractAudio',
-        'preferredcodec': 'mp3',
-        'preferredquality': '192',
-    }], 
-    'outtmpl':"./"+id+'/%(id)s.%(ext)s',
-  }   
-  with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-    while True: 
-      try:
-        ydl.download([songs[0]["url"]])
-      except Exception:
-          async def message():
-            await ctx.send("Song:"+songs[0]["title"]+"caught error. Removed from playlist")
-          return self.replay(ctx,id)
-  voice = discord.utils.get(self.bot.voice_clients, guild=ctx.guild)
-  try:
-
-    voice.play(discord.FFmpegPCMAudio("./"+id+"/"+str(songs[0]["id"])+".mp3"), after=lambda e: self.replay(ctx,id))
-    voice.source = discord.PCMVolumeTransformer(voice.source)
-    voice.source.volume = 0.07
-  except Exception:
-    self.replay(ctx,id)
-  """
-
 
 
 def setup(bot):
