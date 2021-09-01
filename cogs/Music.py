@@ -992,11 +992,12 @@ class Music(commands.Cog):
   @commands.command(pass_context = True)
   async def lyrics(self,ctx,*,word):
     if not word:
-      word = self.player[ctx.guild.id].title
+      if ctx.guild.id in self.player:
+        word = self.player[ctx.guild.id].title
     songs = genius.search_songs(word)
     if songs['hits']:
       song = songs['hits'][0]['result']
-      title = song.get('title_with_featured',None)+song.get('name',None) or song.get('title',None)+song.get('name',None)  or "Nothing"
+      title = song.get('title_with_featured',None) or song.get('title',None) or "Nothing"
       url = song.get('url',None)
       lyrics =  genius.lyrics(song_url=url)
       embed = discord.Embed(title=title,description=lyrics[:4096])
