@@ -953,12 +953,32 @@ class Music(commands.Cog):
         s_opts[serverId][1]['volume'] = value
         await ctx.send(f'Default volume has been set to {value}')
     elif setting.lower() == "8d":
-      if '8d' in s_opts[serverId][1]['temp']:
-        del s_opts[serverId][1]['temp']['8d']
-        await ctx.send("8d sound effect turned off")
+      if serverId in self.player and ctx.voice_client.is_playing():
+        if '8d' in s_opts[serverId][1]['temp']:
+          del s_opts[serverId][1]['temp']['8d']
+          await ctx.send("8d sound effect turned off")
+        else:
+          s_opts[serverId][1]['temp']['8d'] = 'apulsator=hz=0.125,'
+          await ctx.send("8d sound effect turned on")
+
+      if self.player[serverId].timeq[2] == 0:
+          timepassed = int(time.time()-(self.player[serverId].timeq[0]+self.player[serverId].timeq[1]))
       else:
-        s_opts[serverId][1]['temp']['8d'] = 'apulsator=hz=0.125,'
-        await ctx.send("8d sound effect turned on")
+          timepassed = int(self.player[serverId].timeq[2]-self.player[serverId].timeq[0])
+
+      if 'speed' in s_opts[serverId][1]['temp']:
+        if len(s_opts[serverId][1]['temp']['speed']) > 12:
+          speed = 4
+        else:
+          speed = float(s_opts[serverId][1]['temp']['speed'].split("=")[1][:-1])
+        timetoreset = [int((timepassed*speed)), -int(timepassed)]
+      else:
+        timetoreset = [(timepassed), -(timepassed)]
+
+      self.player[serverId].set_repeat(True)
+      volume = ctx.voice_client.source.volume
+      ctx.voice_client.stop()
+      self.playmusic(ctx,serverId,nowplaying=[self.player[serverId].data,timetoreset],loop=self.player[serverId].loop,volume=volume)
       
     elif setting.lower() == "adveq":
       eqsets = discord.Embed(title=f"{self.bot.user.name}'s equalization",description='Pick from 5 standard presets or make your own by clicking the + button. If you are creating your own presets please prepare your settings beforehand. You can find info on the eq settings you can set in ```!opts eqinfo```.',colour=0x02C1ff)
