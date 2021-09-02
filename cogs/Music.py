@@ -3,8 +3,8 @@ import time
 import random
 import asyncio
 from discord.channel import VoiceChannel
-import yt-dlp
-from yt-dlp import DownloadError
+import yt_dlp
+from yt_dlp import DownloadError
 import discord
 from discord.ext import commands,tasks
 from youtube_search import YoutubeSearch 
