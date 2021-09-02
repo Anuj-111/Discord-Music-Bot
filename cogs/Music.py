@@ -487,7 +487,7 @@ class Music(commands.Cog):
     if "entries" in info2:
       del info2["entries"][0]
       for entry in reversed(info2["entries"]):
-        db[serverId].insert(0,{'video':entry.get('url',None),'id':entry.get('id',None),'title':entry.get('title',None),'duration':entry.get('duration',None),'author': str(ctx.author),'ls':False})
+        db[serverId].insert(0,{'video':entry.get('url',None),'url':entry.get('webpage_url',None),'thumbnail':entry.get('thumbnail',None),'channel':entry.get('channel',None),'tags':entry.get('tags',None)[:3] if entry.get('tags',None) else None,'id':entry.get('id',None),'title':entry.get('title',None),'duration':entry.get('duration',None),'author': str(ctx.author),'ls':False})
       if firstsong:
         db[serverId].insert(0,firstsong)
     else:
@@ -562,7 +562,7 @@ class Music(commands.Cog):
     if "entries" in info2:
       del info2["entries"][0]
       for entry in reversed(info2["entries"]):
-         db[serverId].insert(0,{'video':entry.get('url',None),'id':entry.get('id',None),'title':entry.get('title',None),'duration':entry.get('duration',None),'author': str(ctx.author),'ls':False})
+         db[serverId].insert(0,{'video':entry.get('url',None),'url':entry.get('webpage_url',None),'thumbnail':entry.get('thumbnail',None),'channel':entry.get('channel',None),'tags':entry.get('tags',None)[:3] if entry.get('tags',None) else None,'id':entry.get('id',None),'title':entry.get('title',None),'duration':entry.get('duration',None),'author': str(ctx.author),'ls':False})
     else:
       return None
       
@@ -581,7 +581,8 @@ class Music(commands.Cog):
     if request is None:
       return
 
-    livestream = False    
+    livestream = False
+    """    
     if not "." in request:
           await ctx.send("`Searching for "+request+" on Youtube`")
           try:
@@ -593,7 +594,7 @@ class Music(commands.Cog):
           except Exception:
             await ctx.send("`No searches found.`")
             return None
-    
+    """
     serverId = ctx.guild.id
 
     await ctx.send("`Attempting to request "+request+"`")
@@ -628,7 +629,7 @@ class Music(commands.Cog):
     if "entries" in info2:
       del info2["entries"][0]
       for entry in info2["entries"]:
-        db[serverId].append({'video':entry.get('url',None),'id':entry.get('id',None),'title':entry.get('title',None),'duration':entry.get('duration',None),'author': str(ctx.author),'ls':False})
+        db[serverId].append({'video':entry.get('url',None),'url':entry.get('webpage_url',None),'thumbnail':entry.get('thumbnail',None),'channel':entry.get('channel',None),'tags':entry.get('tags',None)[:3] if entry.get('tags',None) else None,'id':entry.get('id',None),'title':entry.get('title',None),'duration':entry.get('duration',None),'author': str(ctx.author),'ls':False})
     else:
       return None
     
