@@ -333,10 +333,10 @@ class Music(commands.Cog):
         queuetime = "infite?-looped"
         progressbar = self.progressbar(0,100)
         
-      embed = discord.Embed(title="`"+queuetime+"`",description=progressbar,colour= discord.Colour.blue())
+      embed = discord.Embed(title="`"+queuetime+"`",description=progressbar,colour=0x000000)
       embed.set_author(name='Nowplaying: '+self.player[id].title,url=self.player[id].url,icon_url='https://cdn.discordapp.com/attachments/819709519063678978/882819723950182480/noice.gif')
       embed.set_image(url=self.player[id].thumbnail)
-      embed.set_footer(text="From"+self.player[id].channel+"     Requested by: "+self.player[id].author)
+      embed.set_footer(text="From: "+self.player[id].channel+" and Requested by: "+self.player[id].author)
       await ctx.send(embed=embed)
     else:
       await ctx.send("No songs are currently playing")
