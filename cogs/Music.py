@@ -25,11 +25,19 @@ class Timer():
         self.bot = bot
         self.check = dict()
         self.check2 = dict()
+
+    def checkentry(self,serverId):
+      in_check = False
+      for key in self.check:
+          if serverId in self.check[key]:
+            in_check = True
+            break
+      return in_check
         
     async def delentry(self,serverId):
-        for key in self.check:
-            if serverId in self.check[key]:
-                del self.check[key][serverId]
+      for key in self.check:
+          if serverId in self.check[key]:
+              del self.check[key][serverId]
 
 
     @tasks.loop(seconds=60) 
@@ -86,6 +94,7 @@ class Timer():
             self.check2[str(minute)] = {}
             self.check2[str(minute)][serverId] = True
 
+    
 
       
 class Source(discord.PCMVolumeTransformer):
@@ -213,9 +222,10 @@ class Music(commands.Cog):
       await ctx.send('Use Arctic-Chan in a server please.')
       return None
     channel = await self.checkconditions(ctx,voice)
-    if channel == None:
+    if channel is None:
       return
-    self.timer.setentry(ctx.guild.id,1)
+    if not self.timer.checkentry(ctx.guild.id):   
+      self.timer.setentry(ctx.guild.id,1)
     
   @commands.command(aliases=['leav','dc','leave','stop'],pass_context = True)
   async def disconnect(self,ctx):
@@ -227,16 +237,19 @@ class Music(commands.Cog):
     if serverId in db:
        del db[serverId]
        del s_opts[serverId]
-    if voice and voice.is_connected() and len(voice.channel.members) == 1 or ctx.author.voice and ctx.author.voice.channel == voice.channel:
-      if serverId in self.player:
-        if self.player[serverId].loop == True:
-          self.player[serverId].set_loop(False)
-        voice.stop()
-      voice.cleanup()
-      await voice.disconnect()
-      await self.timer.delentry(ctx.guild.id)   
+    if voice and voice.is_connected():
+      if len(voice.channel.members) == 1 or ctx.author.voice and ctx.author.voice.channel == voice.channel:
+        if serverId in self.player:
+          if self.player[serverId].loop == True:
+            self.player[serverId].set_loop(False)
+          voice.stop()
+        voice.cleanup()
+        await voice.disconnect()
+        await self.timer.delentry(ctx.guild.id)   
+      else:
+        await ctx.send("**User isn't connected to bot's voice channel**")
     else:
-      await ctx.send("**User isn't connected to bot's voice channel or bot isn't connected**")
+      await ctx.send("**Bot isn't connected**")
 
   @commands.command(aliases=['q'],pass_context= True)
   async def queue(self,ctx):
@@ -421,18 +434,20 @@ class Music(commands.Cog):
 
               
   @commands.command(aliases=['pt'],pass_context = True)
-  async def playtop(self,ctx):
+  async def playtop(self,ctx,*,request=None):
 
     voice = discord.utils.get(self.bot.voice_clients, guild=ctx.guild)
     if isinstance(ctx.channel, discord.DMChannel):
       await ctx.send('Use Arctic-Chan in a server please.')
       return None
     channel = await self.checkconditions(ctx,voice)
-    if channel == None:
+    if channel is None:
       return
     livestream = False
-    request = ctx.message.content.split(" ",1)[1] if len(ctx.message.content.split(" ",1)) > 1 else None
-    if request == None:
+    
+    if request is None:
+      if voice and not voice.is_playing() and not self.timer.checkentry(ctx.guild.id):
+        self.timer.setentry(ctx.guild.id,1)
       return
     
     if not "." in request:
@@ -450,7 +465,7 @@ class Music(commands.Cog):
 
     await ctx.send("`Attempting to request "+request+"`")
     info = await Source.breakdownurl(self,request,serverId,Loop = self.bot.loop,npl=False)
-    if info == None:
+    if info is None:
       await ctx.send("`Invalid URL`")
       return None
     else:
@@ -493,18 +508,19 @@ class Music(commands.Cog):
         
 
   @commands.command(aliases=['ps'],pass_context = True)
-  async def playskip(self,ctx):
+  async def playskip(self,ctx,*,request=None):
     
     voice = discord.utils.get(self.bot.voice_clients, guild=ctx.guild)
     if isinstance(ctx.channel, discord.DMChannel):
       await ctx.send('Use Arctic-Chan in a server please.')
       return None
     channel = await self.checkconditions(ctx,voice)
-    if channel == None:
+    if channel is None:
       return
 
-    request = ctx.message.content.split(" ",1)[1] if len(ctx.message.content.split(" ",1)) > 1 else None
-    if request == None:
+    if request is None:
+      if voice and not voice.is_playing() and not self.timer.checkentry(ctx.guild.id):
+        self.timer.setentry(ctx.guild.id,1)
       return
     livestream = False
     
@@ -527,7 +543,7 @@ class Music(commands.Cog):
 
     await ctx.send("`Searching for "+request+" on Youtube`")
     info = await Source.breakdownurl(self,request,serverId,Loop = self.bot.loop)
-    if info == None:
+    if info is None:
       await ctx.send("`Invalid URL`")
       return None
     else:
@@ -567,18 +583,20 @@ class Music(commands.Cog):
       
 
   @commands.command(aliases=['p','pla'],pass_context = True)
-  async def play(self,ctx):
+  async def play(self,ctx,*,request=None):
     voice = discord.utils.get(self.bot.voice_clients, guild=ctx.guild)
     if isinstance(ctx.channel, discord.DMChannel):
       await ctx.send('Use Arctic-Chan in a server please.')
       return None
     channel = await self.checkconditions(ctx,voice)
-    if channel == None:
+    if channel is None:
+      return
+    if request is None:
+      if voice and not voice.is_playing() and not self.timer.checkentry(ctx.guild.id):
+        self.timer.setentry(ctx.guild.id,1)
       return
 
-    request = ctx.message.content.split(" ",1)[1] if len(ctx.message.content.split(" ",1)) > 1 else None
-    if request == None:
-      return
+      
     livestream = False
     
     
@@ -600,7 +618,7 @@ class Music(commands.Cog):
 
     await ctx.send("`Attempting to request "+request+"`")
     info = await Source.breakdownurl(self,request,serverId,Loop = self.bot.loop)
-    if info == None:
+    if info is None:
       await ctx.send("`Invalid URL`")
       return None
     else:
@@ -688,7 +706,7 @@ class Music(commands.Cog):
       return None
     serverId = ctx.guild.id
     author = ctx.message.content.split(" ",1)[1] if len(ctx.message.content.split(" ",1)) > 1 else None
-    if author == None:
+    if author is None:
       if serverId in db and len(db[serverId]) > 0:
         db[serverId].clear()
         await ctx.send("```Queue has been Cleared 🧹```")
@@ -699,7 +717,7 @@ class Music(commands.Cog):
       guild = self.bot.get_guild(int(serverId))
       author = int(author[3:-1])
       name = await guild.fetch_member(author)
-      if name == None:
+      if name is None:
         return
       maxv = len(db[serverId])
       count = 0
@@ -722,7 +740,7 @@ class Music(commands.Cog):
       return None
 
     channel = await self.checkconditions(ctx,voice)
-    if channel == None:
+    if channel is None:
       return
     request = ctx.message.content.split(" ",1)[1] if len(ctx.message.content.split(" ",1)) > 1 else None
     if not request:
@@ -748,7 +766,7 @@ class Music(commands.Cog):
       if value <= len(ytrequest['videos']):
         request = 'https://www.youtube.com/watch?v='+str(ytrequest['videos'][value-1]['id'])
         info = await Source.breakdownurl(self,request,ctx.guild.id,Loop = self.bot.loop)
-        if info == None:
+        if info is None:
           await ctx.send("`Invalid URL`")
           return None
         if ytrequest['videos'][value-1]['publish_time'] == 0:
@@ -905,7 +923,7 @@ class Music(commands.Cog):
       await ctx.send('Use Arctic-Chan in a server please.')
       return None
     serverId = ctx.guild.id
-    if setting == None:
+    if setting is None:
       pass
     elif setting.lower() == "speed":
       if serverId in self.player and ctx.voice_client.is_playing():
@@ -1245,7 +1263,8 @@ class Music(commands.Cog):
           nowplaying = db[id].pop(0)
         else:
           del self.player[id]
-          self.timer.setentry(id,1)
+          if not self.timer.checkentry(ctx.guild.id):
+            self.timer.setentry(id,1)
           return None 
           
       player = Source.streamvideo(nowplaying,loop=loop,options=self.getoptions(id),volume=s_opts[id][1]['volume'])
