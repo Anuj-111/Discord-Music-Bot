@@ -128,7 +128,7 @@ class Source(discord.PCMVolumeTransformer):
         'no_warnings': False,
         'source_address': '0.0.0.0' # bind to ipv4 since ipv6 addresses cause issues sometimes
         }
-        ytdl = yt-dlp.YoutubeDL(ytdl_format_options)
+        ytdl = yt_dlp.YoutubeDL(ytdl_format_options)
 
         try:
           loop = Loop or asyncio.get_event_loop()
@@ -1360,7 +1360,7 @@ class Music(commands.Cog):
     'quiet': True,
     'noplaylist': True,
     }
-    with yt-dlp.YoutubeDL(dlopts) as ydl:
+    with yt_dlp.YoutubeDL(dlopts) as ydl:
       info = ydl.extract_info(url,download=False)
       if info['duration'] > 600 or info['duration'] == 0:
         await ctx.send('Song duration can not be more than 10 mins')
