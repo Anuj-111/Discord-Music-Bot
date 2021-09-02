@@ -34,7 +34,7 @@ class Timer():
             break
       return in_check
         
-    async def delentry(self,serverId):
+    def delentry(self,serverId):
       for key in self.check:
           if serverId in self.check[key]:
               del self.check[key][serverId]
@@ -192,20 +192,13 @@ class Music(commands.Cog):
         if ctx.guild.id in self.player:
           if self.player[ctx.guild.id].loop:
             self.player[ctx.guild.id].set_loop(False)
-        await self.timer.delentry(ctx.guild.id)   
+        self.timer.delentry(ctx.guild.id)   
       elif voice and len(voice.channel.members) == 1:
         if ctx.guild.id in self.player:
           if self.player[ctx.guild.id].loop:
             self.player[ctx.guild.id].set_loop(False)
         self.timer.setentry(ctx.guild.id,2)
-    
-   
-
-  @commands.Cog.listener()
-  async def on_command_completion(self,ctx):
-    if ctx.guild.id in self.player:
-      await self.timer.delentry(ctx.guild.id)
-           
+               
   @commands.command(aliases=['h'],pass_context= True)
   async def help(self,ctx):
     embed = discord.Embed(title="Google Docs documentation",description="**[Link to documentation](https://1pt.co/music)**",colour= random.randint(0, 0xffffff))
@@ -218,19 +211,17 @@ class Music(commands.Cog):
   async def join(self,ctx):
     voice = discord.utils.get(self.bot.voice_clients, guild=ctx.guild)
     if isinstance(ctx.channel, discord.DMChannel):
-      await ctx.send('Use Arctic-Chan in a server please.')
+      await ctx.send(f'Use {self.bot.user.name} in a server please.')
       return None
-    channel = await self.checkconditions(ctx,voice)
-    if channel is None:
+    if not(x := await self.checkconditions(ctx)):
       return
-    if not ctx.guild.id in self.player and not self.timer.checkentry(ctx.guild.id):   
-      self.timer.setentry(ctx.guild.id,1)
+
     
   @commands.command(aliases=['leav','dc','leave','stop'],pass_context = True)
   async def disconnect(self,ctx):
     voice = discord.utils.get(self.bot.voice_clients, guild=ctx.guild)
     if isinstance(ctx.channel, discord.DMChannel):
-      await ctx.send('Use Arctic-Chan in a server please.')
+      await ctx.send(f'Use {self.bot.user.name} in a server please.')
       return None
     serverId = ctx.guild.id
     if serverId in db:
@@ -244,7 +235,7 @@ class Music(commands.Cog):
           voice.stop()
         voice.cleanup()
         await voice.disconnect()
-        await self.timer.delentry(ctx.guild.id)   
+        self.timer.delentry(ctx.guild.id)   
       else:
         await ctx.send("**User isn't connected to bot's voice channel**")
     else:
@@ -253,7 +244,7 @@ class Music(commands.Cog):
   @commands.command(aliases=['q'],pass_context= True)
   async def queue(self,ctx):
     if isinstance(ctx.channel, discord.DMChannel):
-      await ctx.send('Use Arctic-Chan in a server please.')
+      await ctx.send(f'Use {self.bot.user.name} in a server please.')
       return None
     serverId = ctx.guild.id
     id = serverId
@@ -320,7 +311,7 @@ class Music(commands.Cog):
   @commands.command(aliases=['np','nowplay'])
   async def nowplaying(self,ctx):
     if isinstance(ctx.channel, discord.DMChannel):
-      await ctx.send('Use Arctic-Chan in a server please.')
+      await ctx.send(f'Use {self.bot.user.name} in a server please.')
       return None
     
     id = ctx.guild.id
@@ -372,7 +363,7 @@ class Music(commands.Cog):
   @commands.command(aliases=['sh'],pass_context = True)
   async def shuffle(self,ctx):
     if isinstance(ctx.channel, discord.DMChannel):
-      await ctx.send('Use Arctic-Chan in a server please.')
+      await ctx.send(f'Use {self.bot.user.name} in a server please.')
       return None
     serverId = ctx.guild.id
     if serverId in db:
@@ -382,7 +373,7 @@ class Music(commands.Cog):
   @commands.command(aliases=['rp'],pass_context = True)
   async def replay(self,ctx):
     if isinstance(ctx.channel, discord.DMChannel):
-      await ctx.send('Use Arctic-Chan in a server please.')
+      await ctx.send(f'Use {self.bot.user.name} in a server please.')
       return None
     serverId = ctx.guild.id
     if serverId in self.player:
@@ -392,7 +383,7 @@ class Music(commands.Cog):
   @commands.command(aliases=['sv'])
   async def save(self,ctx):
     if isinstance(ctx.channel, discord.DMChannel):
-      await ctx.send('Use Arctic-Chan in a server please.')
+      await ctx.send(f'Use {self.bot.user.name} in a server please.')
       return None
     
     serverId = ctx.guild.id
@@ -405,7 +396,7 @@ class Music(commands.Cog):
   @commands.command(aliases=['vol'])
   async def volume(self,ctx,volume: int):
     if isinstance(ctx.channel, discord.DMChannel):
-      await ctx.send('Use Arctic-Chan in a server please.')
+      await ctx.send(f'Use {self.bot.user.name} in a server please.')
       return None
     if volume > 250:
       await ctx.send("Sorry, volume has been capped to 250%.")
@@ -421,7 +412,7 @@ class Music(commands.Cog):
   @commands.command(aliases=['mv'],pass_context = True)
   async def move(self,ctx,value1:int,value2:int):
     if isinstance(ctx.channel, discord.DMChannel):
-      await ctx.send('Use Arctic-Chan in a server please.')
+      await ctx.send(f'Use {self.bot.user.name} in a server please.')
       return None
     serverId = ctx.guild.id
     if value1 < 1 or value2 < 1 or value1 > len(db[serverId]) or value2 > len(db[serverId]):
@@ -437,16 +428,13 @@ class Music(commands.Cog):
 
     voice = discord.utils.get(self.bot.voice_clients, guild=ctx.guild)
     if isinstance(ctx.channel, discord.DMChannel):
-      await ctx.send('Use Arctic-Chan in a server please.')
+      await ctx.send(f'Use {self.bot.user.name} in a server please.')
       return None
-    channel = await self.checkconditions(ctx,voice)
-    if channel is None:
+    if not (x := await self.checkconditions(ctx)):
       return
     livestream = False
     
     if request is None:
-      if not ctx.guild.id in self.player and not self.timer.checkentry(ctx.guild.id):
-        self.timer.setentry(ctx.guild.id,1)
       return
     
     if not "." in request:
@@ -511,15 +499,13 @@ class Music(commands.Cog):
     
     voice = discord.utils.get(self.bot.voice_clients, guild=ctx.guild)
     if isinstance(ctx.channel, discord.DMChannel):
-      await ctx.send('Use Arctic-Chan in a server please.')
+      await ctx.send(f'Use {self.bot.user.name} in a server please.')
       return None
-    channel = await self.checkconditions(ctx,voice)
-    if channel is None:
+  
+    if not (x := await self.checkconditions(ctx)):
       return
     
     if request is None:
-      if not ctx.guild.id in self.player and not self.timer.checkentry(ctx.guild.id):
-        self.timer.setentry(ctx.guild.id,1)
       return
     livestream = False
     
@@ -584,21 +570,18 @@ class Music(commands.Cog):
   @commands.command(aliases=['p','pla'],pass_context = True)
   async def play(self,ctx,*,request=None):
     voice = discord.utils.get(self.bot.voice_clients, guild=ctx.guild)
+    
     if isinstance(ctx.channel, discord.DMChannel):
-      await ctx.send('Use Arctic-Chan in a server please.')
+      await ctx.send(f'Use {self.bot.user.name} in a server please.')
       return None
-    channel = await self.checkconditions(ctx,voice)
-    if channel is None:
-      return
-    if request is None:
-      if not ctx.guild.id in self.player and not self.timer.checkentry(ctx.guild.id):
-        self.timer.setentry(ctx.guild.id,1)
+
+    if not (x := await self.checkconditions(ctx)):
       return
 
-      
-    livestream = False
-    
-    
+    if request is None:
+      return
+
+    livestream = False    
     if not "." in request:
           await ctx.send("`Searching for "+request+" on Youtube`")
           try:
@@ -606,13 +589,11 @@ class Music(commands.Cog):
             request = 'https://www.youtube.com/watch?v='+str(ytrequest['videos'][0]['id'])
             if ytrequest['videos'][0]['publish_time'] == 0:
               livestream = True
-            
+  
           except Exception:
             await ctx.send("`No searches found.`")
             return None
     
-       
-
     serverId = ctx.guild.id
 
     await ctx.send("`Attempting to request "+request+"`")
@@ -658,7 +639,7 @@ class Music(commands.Cog):
   async def pause(self,ctx):
      voice = discord.utils.get(self.bot.voice_clients, guild=ctx.guild)
      if isinstance(ctx.channel, discord.DMChannel):
-        await ctx.send('Use Arctic-Chan in a server please.')
+        await ctx.send(f'Use {self.bot.user.name} in a server please.')
         return None
 
      if voice and voice.is_playing():
@@ -673,7 +654,7 @@ class Music(commands.Cog):
   @commands.command(aliases=['resum'],pass_context = True)
   async def resume(self,ctx):
     if isinstance(ctx.channel, discord.DMChannel):
-      await ctx.send('Use Arctic-Chan in a server please.')
+      await ctx.send(f'Use {self.bot.user.name} in a server please.')
       return None
     voice = discord.utils.get(self.bot.voice_clients, guild=ctx.guild)
 
@@ -686,7 +667,7 @@ class Music(commands.Cog):
   @commands.command(aliases=['fs','skip'],pass_context = True)
   async def forceskip(self,ctx):
     if isinstance(ctx.channel, discord.DMChannel):
-      await ctx.send('Use Arctic-Chan in a server please.')
+      await ctx.send(f'Use {self.bot.user.name} in a server please.')
       return None
     voice = discord.utils.get(self.bot.voice_clients, guild=ctx.guild)
     if voice and voice.is_connected():
@@ -701,7 +682,7 @@ class Music(commands.Cog):
   @commands.command(aliases=['clea','clean'])
   async def clear(self,ctx):
     if isinstance(ctx.channel, discord.DMChannel):
-      await ctx.send('Use Arctic-Chan in a server please.')
+      await ctx.send(f'Use {self.bot.user.name} in a server please.')
       return None
     serverId = ctx.guild.id
     author = ctx.message.content.split(" ",1)[1] if len(ctx.message.content.split(" ",1)) > 1 else None
@@ -735,11 +716,10 @@ class Music(commands.Cog):
   async def search(self,ctx,*,request):
     voice = discord.utils.get(self.bot.voice_clients, guild=ctx.guild)
     if isinstance(ctx.channel, discord.DMChannel):
-      await ctx.send('Use Arctic-Chan in a server please.')
+      await ctx.send(f'Use {self.bot.user.name} in a server please.')
       return None
-
-    channel = await self.checkconditions(ctx,voice)
-    if channel is None:
+      
+    if not (x := await self.checkconditions(ctx)):
       return
 
     await ctx.send("`Searching for "+request+" on Youtube`")
@@ -768,19 +748,17 @@ class Music(commands.Cog):
         if ytrequest['videos'][value-1]['publish_time'] == 0:
           livestream = True
         serverId = ctx.guild.id
-        if serverId in self.player:
-          db[serverId].append({'video':info.get('url',None), 'url': request,'id':info.get('id',None),'title':info.get('title',None),'duration':info.get('duration',None),'thumbnail':info.get('thumbnail',None),'channel':info.get('channel',None),'tags':info.get('tags',None)[:3] if info.get('tags',None) else None,'author': str(ctx.author),'ls':livestream})
-        else:
-          db[serverId].append({'video':info.get('url',None), 'url': request,'id':info.get('id',None),'title':info.get('title',None),'duration':info.get('duration',None),'thumbnail':info.get('thumbnail',None),'channel':info.get('channel',None),'tags':info.get('tags',None)[:3] if info.get('tags',None) else None,'author': str(ctx.author),'ls': livestream})
+        db[serverId].append({'video':info.get('url',None), 'url': request,'id':info.get('id',None),'title':info.get('title',None),'duration':info.get('duration',None),'thumbnail':info.get('thumbnail',None),'channel':info.get('channel',None),'tags':info.get('tags',None)[:3] if info.get('tags',None) else None,'author': str(ctx.author),'ls':livestream})
+        if not serverId in self.player:
           self.playmusic(ctx,serverId)
       
     except asyncio.TimeoutError:
-      return None
+      return None 
      
   @commands.command(pass_context = True)
   async def loop(self,ctx):
     if isinstance(ctx.channel, discord.DMChannel):
-      await ctx.send('Use Arctic-Chan in a server please.')
+      await ctx.send(f'Use {self.bot.user.name} in a server please.')
       return None
 
     serverId = ctx.guild.id
@@ -792,15 +770,15 @@ class Music(commands.Cog):
         self.player[serverId].set_loop(False)
         await ctx.send("```Song has been unlooped🔁```")
 
-  async def checkconditions(self,ctx,voice):
+  async def checkconditions(self,ctx):
     channel = None
     try:
       if ctx.author.voice.channel:
         channel = ctx.author.voice.channel
     except Exception:
       await ctx.send("**User is not in voice Channel**")
-      return None
-      
+      return False
+    voice = discord.utils.get(self.bot.voice_clients, guild=ctx.guild)
     if voice and voice.is_connected():
       if voice.channel.id != channel.id and not voice.channel.members:
         await voice.move_to(channel)
@@ -815,14 +793,15 @@ class Music(commands.Cog):
         s_opts[serverId] = ["",{},0]
         s_opts[serverId][1]['volume'] = 0.75
         s_opts[serverId][1]['temp'] = dict()
+        self.timer.setentry(ctx.guild.id,1)
       except asyncio.TimeoutError:
         await ctx.send('bot has disconnected')
-    return channel
+    return True
 
   @commands.command(pass_context = True)
   async def forward(self,ctx,value:int):
     if isinstance(ctx.channel, discord.DMChannel):
-      await ctx.send('Use Arctic-Chan in a server please.')
+      await ctx.send(f'Use {self.bot.user.name} in a server please.')
       return None
     serverId = ctx.guild.id
     if serverId in self.player and ctx.voice_client.is_playing():
@@ -858,7 +837,7 @@ class Music(commands.Cog):
   @commands.command(pass_context = True)
   async def rewind(self,ctx,value:int):
     if isinstance(ctx.channel, discord.DMChannel):
-      await ctx.send('Use Arctic-Chan in a server please.')
+      await ctx.send(f'Use {self.bot.user.name} in a server please.')
       return None
     serverId = ctx.guild.id
     if serverId in self.player and ctx.voice_client.is_playing():
@@ -894,7 +873,7 @@ class Music(commands.Cog):
   async def test(self,ctx,options=None):
     if ctx.author.id == 278646990777221120:
       if isinstance(ctx.channel, discord.DMChannel):
-       await ctx.send('Use Arctic-Chan in a server please.')
+       await ctx.send(f'Use {self.bot.user.name} in a server please.')
        return None 
       await ctx.author.voice.channel.connect(timeout=60.0,reconnect=True)
       """
@@ -916,7 +895,7 @@ class Music(commands.Cog):
   @commands.command(aliases=['options','settings'],pass_context = True)
   async def opts(self,ctx,setting: str,*,value=None):
     if isinstance(ctx.channel, discord.DMChannel):
-      await ctx.send('Use Arctic-Chan in a server please.')
+      await ctx.send(f'Use {self.bot.user.name} in a server please.')
       return None
     serverId = ctx.guild.id
     if setting is None:
@@ -1267,6 +1246,7 @@ class Music(commands.Cog):
       self.player[id] = player
       try:
         ctx.voice_client.play(player, after=lambda e: self.reseteffects(id) or self.playmusic(ctx,id,loop=self.player[id].loop) if not player.repeat else player.set_repeat(False))
+        self.timer.delentry(ctx.guild.id)
       except Exception:
         if not player.repeat:
           self.reseteffects(id) 
