@@ -5,7 +5,7 @@ from discord.ext import commands
 import datetime
 
 
-bot = commands.Bot(command_prefix = "!",case_insensitive =True)
+bot = commands.Bot(command_prefix = "!",case_insensitive =True,activity = discord.Game(name="Music for your ❤️"))
 bot.remove_command('help')
 
 @bot.event
