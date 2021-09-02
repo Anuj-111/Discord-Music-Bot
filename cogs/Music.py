@@ -459,7 +459,7 @@ class Music(commands.Cog):
      
 
     playlist = True if 'list=' in info else False
-    song_info = {'video':info.get('url',None), 'url': request,'id':info.get('id',None),'title':info.get('title',None),'duration':info.get('duration',None),'thumbnail':info.get('thumbnail',None),'channel':info.get('channel',None),'tags':info.get('tags',None)[:3],'author': str(ctx.author),'ls':livestream}
+    song_info = {'video':info.get('url',None), 'url': request,'id':info.get('id',None),'title':info.get('title',None),'duration':info.get('duration',None),'thumbnail':info.get('thumbnail',None),'channel':info.get('channel',None),'tags':info.get('tags',None)[:3] if info.get('tags',None) else None,'author': str(ctx.author),'ls':livestream}
 
     if serverId in self.player:
       db[serverId].insert(0,song_info)
@@ -535,7 +535,7 @@ class Music(commands.Cog):
       livestream = True
 
     playlist = True if "list=" in request else False
-    song_info = {'video':info.get('url',None), 'url': request,'id':info.get('id',None),'title':info.get('title',None),'duration':info.get('duration',None),'thumbnail':info.get('thumbnail',None),'channel':info.get('channel',None),'tags':info.get('tags',None)[:3],'author': str(ctx.author),'ls':livestream}
+    song_info = {'video':info.get('url',None), 'url': request,'id':info.get('id',None),'title':info.get('title',None),'duration':info.get('duration',None),'thumbnail':info.get('thumbnail',None),'channel':info.get('channel',None),'tags':info.get('tags',None)[:3] if info.get('tags',None) else None,'author': str(ctx.author),'ls':livestream}
 
     db[serverId].insert(0,song_info)
     await self.addedtoqueue(ctx,song_info,playlist,0,thumbnail=song_info.get('thumbnail',None))
@@ -608,7 +608,7 @@ class Music(commands.Cog):
       livestream = True
 
     playlist = True if 'list=' in request else False
-    song_info = {'video':info.get('url',None), 'url': request,'id':info.get('id',None),'title':info.get('title',None),'duration':info.get('duration',None),'thumbnail':info.get('thumbnail',None),'channel':info.get('channel',None),'tags':info.get('tags',None)[:3],'author': str(ctx.author),'ls':livestream}
+    song_info = {'video':info.get('url',None), 'url': request,'id':info.get('id',None),'title':info.get('title',None),'duration':info.get('duration',None),'thumbnail':info.get('thumbnail',None),'channel':info.get('channel',None),'tags':info.get('tags',None)[:3] if info.get('tags',None) else None,'author': str(ctx.author),'ls':livestream}
    
     if serverId in self.player:
       db[serverId].append(song_info)
@@ -752,9 +752,9 @@ class Music(commands.Cog):
           livestream = True
         serverId = ctx.guild.id
         if serverId in self.player:
-          db[serverId].append({'video':info.get('url',None), 'url': request,'id':info.get('id',None),'title':info.get('title',None),'duration':info.get('duration',None),'thumbnail':info.get('thumbnail',None),'channel':info.get('channel',None),'tags':info.get('tags',None)[:3],'author': str(ctx.author),'ls':livestream})
+          db[serverId].append({'video':info.get('url',None), 'url': request,'id':info.get('id',None),'title':info.get('title',None),'duration':info.get('duration',None),'thumbnail':info.get('thumbnail',None),'channel':info.get('channel',None),'tags':info.get('tags',None)[:3] if info.get('tags',None) else None,'author': str(ctx.author),'ls':livestream})
         else:
-          db[serverId].append({'video':info.get('url',None), 'url': request,'id':info.get('id',None),'title':info.get('title',None),'duration':info.get('duration',None),'thumbnail':info.get('thumbnail',None),'channel':info.get('channel',None),'tags':info.get('tags',None)[:3],'author': str(ctx.author),'ls': livestream})
+          db[serverId].append({'video':info.get('url',None), 'url': request,'id':info.get('id',None),'title':info.get('title',None),'duration':info.get('duration',None),'thumbnail':info.get('thumbnail',None),'channel':info.get('channel',None),'tags':info.get('tags',None)[:3] if info.get('tags',None) else None,'author': str(ctx.author),'ls': livestream})
           self.playmusic(ctx,serverId)
       
     except asyncio.TimeoutError:
@@ -997,7 +997,10 @@ class Music(commands.Cog):
   async def lyrics(self,ctx,*,text=None):
     if not text:
       if ctx.guild.id in self.player:
-        words = self.player[ctx.guild.id].tags
+        if self.player[ctx.guild.id].tags:
+          words = self.player[ctx.guild.id].tags
+        else:
+          await ctx.send("No lyrics found in genius database")
     else:
       words = [text]
     for word in words:
