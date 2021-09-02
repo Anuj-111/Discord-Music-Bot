@@ -582,7 +582,7 @@ class Music(commands.Cog):
       return
 
     livestream = False
-    """    
+        
     if not "." in request:
           await ctx.send("`Searching for "+request+" on Youtube`")
           try:
@@ -594,7 +594,7 @@ class Music(commands.Cog):
           except Exception:
             await ctx.send("`No searches found.`")
             return None
-    """
+    
     serverId = ctx.guild.id
 
     await ctx.send("`Attempting to request "+request+"`")
