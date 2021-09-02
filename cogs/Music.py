@@ -92,11 +92,14 @@ class Source(discord.PCMVolumeTransformer):
     def __init__(self, source,*,data,timeq=None,loop=False,ls=False,volume=0.25):
         super().__init__(source, volume)
         self.data = data
-        self.id = data.get('id')
-        self.title = data.get('title')
-        self.duration = data.get('duration')
-        self.author = data.get('author')
-        self.ls = data.get('ls')
+        self.id = data.get('id',None)
+        self.title = data.get('title',None)
+        self.duration = data.get('duration',None)
+        self.thumbnail = data.get('thumbnail',None)
+        self.channel = data.get('channel',None)
+        self.tags = data.get('tags',None)
+        self.author = data.get('author',None)
+        self.ls = data.get('ls',None)
         self.timeq = timeq
         self.loop = loop
         self.repeat = False
@@ -249,14 +252,14 @@ class Music(commands.Cog):
         embed.set_footer(text="`Loop:`✔️")
       else:
         embed.set_footer(text="`Loop:`❌")
-      embed.add_field(name="**Now Playing**",value="["+str(self.wslice(self.player[id].title,50))+"]("+'https://www.youtube.com/watch?v='+self.player[id].id+")`|"+self.toHMS(self.player[id].duration)+"| Requested by: "+str(self.player[id].author)+"`",inline=False)
+      embed.add_field(name="**Now Playing**",value="["+str(self.wslice(self.player[id].title,50))+"]("+self.player[id].url+")`|"+self.toHMS(self.player[id].duration)+"| Requested by: "+str(self.player[id].author)+"`",inline=False)
  
       if serverId in db: 
         for value,song in enumerate(db[serverId]):
           if value == 0:
-             embed.add_field(name='Rest in Queue',value=str(value+1)+")["+self.wslice(song.get('title'),50)+"]("+'https://www.youtube.com/watch?v='+song.get('id')+")`|"+self.toHMS(song.get('duration'))+"| Requested by: "+str(song.get('author'))+"`",inline = False)
+             embed.add_field(name='Rest in Queue',value=str(value+1)+")["+self.wslice(song.get('title'),50)+"]("+song.get('url')+")`|"+self.toHMS(song.get('duration'))+"| Requested by: "+str(song.get('author'))+"`",inline = False)
           else:
-            embed.add_field(name='\u200b',value=str(value+1)+")["+self.wslice(song.get('title'),50)+"]("+'https://www.youtube.com/watch?v='+song.get('id')+")`|"+self.toHMS(song.get('duration'))+"| Requested by: "+str(song.get('author'))+"`",inline = False)
+            embed.add_field(name='\u200b',value=str(value+1)+")["+self.wslice(song.get('title'),50)+"]("+song.get('url')+")`|"+self.toHMS(song.get('duration'))+"| Requested by: "+str(song.get('author'))+"`",inline = False)
           if (value+2) % 10 == 0: 
             embeds.append(embed)
             count += 1
@@ -330,8 +333,8 @@ class Music(commands.Cog):
         progressbar = self.progressbar(0,100)
         
       embed = discord.Embed(title="Now Playing: ",description =progressbar, colour= discord.Colour.blue())
-      embed.set_image(url="http://img.youtube.com/vi/%s/0.jpg" % self.player[id].id)
-      embed.add_field(name='`'+queuetime+'`',value="**["+ self.player[id].title +"]("+'https://www.youtube.com/watch?v='+self.player[id].id+")**",inline=False)
+      embed.set_image(url=self.player[id].thumbnail)
+      embed.add_field(name='`'+queuetime+'`',value="**["+ self.player[id].title +"]("+self.player[id].url+")**",inline=False)
       embed.add_field(name="`Requested by: "+self.player[id].author+"`",value='\u200b',inline = False)
       await ctx.send(embed=embed)
     else:
@@ -378,7 +381,7 @@ class Music(commands.Cog):
     
     serverId = ctx.guild.id
     if serverId in self.player:
-      embed = discord.Embed(title="**["+self.duration[serverId].title+"]"+"("+'https://www.youtube.com/watch?v='+self.duration[serverId].id+")**",description = "```Song requested by: "+self.duration[serverId].author+"||"+self.toHMS(self.duration[serverId].duration),colour = 0xffa826)
+      embed = discord.Embed(title="**["+self.player[serverId].title+"]"+"("+self.player[serverId].url+")**",description = "```Song requested by: "+self.player[serverId].author+"||"+self.toHMS(self.player[serverId].duration),colour = 0xffa826)
       embed.set_footer(text="`Saved by Arctic Chan in "+ctx.guild+" at "+str(ctx.message.created_at)+"`")
       user = await ctx.author.create_dm()
       await user.send(embed=embed)
@@ -455,14 +458,14 @@ class Music(commands.Cog):
      
 
     playlist = True if 'list=' in info else False
-    song_info = {'video':info.get('url',None),'id':info.get('id',None),'title':info.get('title',None),'duration':info.get('duration',None),'author': str(ctx.author),'ls':livestream}
+    song_info = {'video':info.get('url',None), 'url': request,'id':info.get('id',None),'title':info.get('title',None),'duration':info.get('duration',None),'thumbnail':info.get('thumbnail',None),'channel':info.get('channel',None),'tags':info.get('tags',None)[:3],'author': str(ctx.author),'ls':livestream}
 
     if serverId in self.player:
       db[serverId].insert(0,song_info)
-      await self.addedtoqueue(ctx,song_info,playlist,1,thumbnail=info.get('thumbnail',None))
+      await self.addedtoqueue(ctx,song_info,playlist,1,thumbnail=song_info.get('thumbnail',None))
     else:
       db[serverId].append(song_info)
-      await self.addedtoqueue(ctx,song_info,playlist,0,thumbnail=info.get('thumbnail',None))
+      await self.addedtoqueue(ctx,song_info,playlist,0,thumbnail=song_info.get('thumbnail',None))
       self.playmusic(ctx,serverId)
 
     if not playlist:
@@ -531,10 +534,10 @@ class Music(commands.Cog):
       livestream = True
 
     playlist = True if "list=" in request else False
-    song_info = {'video':info.get('url',None),'id':info.get('id',None),'title':info.get('title',None),'duration':info.get('duration',None),'author': str(ctx.author),'ls':livestream}
+    song_info = {'video':info.get('url',None), 'url': request,'id':info.get('id',None),'title':info.get('title',None),'duration':info.get('duration',None),'thumbnail':info.get('thumbnail',None),'channel':info.get('channel',None),'tags':info.get('tags',None)[:3],'author': str(ctx.author),'ls':livestream}
 
     db[serverId].insert(0,song_info)
-    await self.addedtoqueue(ctx,song_info,playlist,0,thumbnail=info.get('thumbnail',None))
+    await self.addedtoqueue(ctx,song_info,playlist,0,thumbnail=song_info.get('thumbnail',None))
 
 
     if serverId in self.player:
@@ -604,14 +607,14 @@ class Music(commands.Cog):
       livestream = True
 
     playlist = True if 'list=' in request else False
-    song_info = {'video':info.get('url',None),'id':info.get('id',None),'title':info.get('title',None),'duration':info.get('duration',None),'author': str(ctx.author),'ls':livestream}
+    song_info = {'video':info.get('url',None), 'url': request,'id':info.get('id',None),'title':info.get('title',None),'duration':info.get('duration',None),'thumbnail':info.get('thumbnail',None),'channel':info.get('channel',None),'tags':info.get('tags',None)[:3],'author': str(ctx.author),'ls':livestream}
    
     if serverId in self.player:
       db[serverId].append(song_info)
-      await self.addedtoqueue(ctx,song_info,playlist,len(db[serverId]),thumbnail=info.get('thumbnail',None))
+      await self.addedtoqueue(ctx,song_info,playlist,len(db[serverId]),thumbnail=song_info.get('thumbnail',None))
     else:
       db[serverId].append(song_info)
-      await self.addedtoqueue(ctx,song_info,playlist,0,thumbnail=info.get('thumbnail',None))
+      await self.addedtoqueue(ctx,song_info,playlist,0,thumbnail=song_info.get('thumbnail',None))
       self.playmusic(ctx,serverId)
 
     if not playlist:
@@ -748,9 +751,9 @@ class Music(commands.Cog):
           livestream = True
         serverId = ctx.guild.id
         if serverId in self.player:
-          db[serverId].append({'video':info.get('url',None),'id':info.get('id',None),'title':info.get('title',None),'duration':info.get('duration',None),'author': str(ctx.author),'ls':livestream})
+          db[serverId].append({'video':info.get('url',None), 'url': request,'id':info.get('id',None),'title':info.get('title',None),'duration':info.get('duration',None),'thumbnail':info.get('thumbnail',None),'channel':info.get('channel',None),'tags':info.get('tags',None)[:3],'author': str(ctx.author),'ls':livestream})
         else:
-          db[serverId].append({'video':info.get('url',None),'id':info.get('id',None),'title':info.get('title',None),'duration':info.get('duration',None),'author': str(ctx.author),'ls': livestream})
+          db[serverId].append({'video':info.get('url',None), 'url': request,'id':info.get('id',None),'title':info.get('title',None),'duration':info.get('duration',None),'thumbnail':info.get('thumbnail',None),'channel':info.get('channel',None),'tags':info.get('tags',None)[:3],'author': str(ctx.author),'ls': livestream})
           self.playmusic(ctx,serverId)
       
     except asyncio.TimeoutError:
@@ -990,23 +993,28 @@ class Music(commands.Cog):
 
 
   @commands.command(pass_context = True)
-  async def lyrics(self,ctx,*,word):
-    if not word:
+  async def lyrics(self,ctx,*,text=None):
+    if not text:
       if ctx.guild.id in self.player:
-        word = self.player[ctx.guild.id].title
-    songs = genius.search_songs(word)
-    if songs['hits']:
-      song = songs['hits'][0]['result']
-      title = song.get('title_with_featured',None) or song.get('title',None) or "Nothing"
-      url = song.get('url',None)
-      lyrics =  genius.lyrics(song_url=url)
-      embed = discord.Embed(title=title,description=lyrics[:4096])
-      embed.set_thumbnail(url=song['song_art_image_thumbnail_url'])
-      embed.set_footer(text="Requested by:"+str(ctx.author.name))
-      await ctx.send(embed=embed)
+        words = self.player[ctx.guild.id].tags
+    else:
+      words = [text]
+    for word in words:
+      songs = genius.search_songs(word)
+      if songs['hits']:
+        song = songs['hits'][0]['result']
+        title = song.get('title_with_featured',None) or song.get('title',None) or "Nothing"
+        url = song.get('url',None)
+        lyrics =  genius.lyrics(song_url=url)
+        embed = discord.Embed(title=title,description=lyrics[:4096])
+        embed.set_thumbnail(url=song['song_art_image_thumbnail_url'])
+        embed.set_footer(text="Requested by:"+str(ctx.author.name))
+        await ctx.send(embed=embed)
+        break
+      await asyncio.sleep(0.5)
     else:
       await ctx.send("No lyrics found in genius database")
- 
+  
 
 
 
@@ -1280,7 +1288,7 @@ class Music(commands.Cog):
     else:
       dtp = "Now"
     if not playlist:
-      notif = discord.Embed(title="Song Added to queue",description="**["+data.get('title')+"](https://www.youtube.com/watch?v="+data.get('id')+")**",colour= random.randint(0, 0xffffff))
+      notif = discord.Embed(title="Song Added to queue",description="**["+data.get('title')+"]("+data.get('url')+")**",colour= random.randint(0, 0xffffff))
       notif.add_field(name="Till Played",value=dtp if not data.get('ls') and dtp else "livestream" ,inline=True)
       notif.add_field(name="Song Duration",value=duration if not data.get('ls') else "livestream",inline=True)
       notif.add_field(name="Position",value=position,inline=False)
@@ -1288,7 +1296,7 @@ class Music(commands.Cog):
         notif.set_thumbnail(url=thumbnail)
       
     else:
-      notif = discord.Embed(title="Playlist added/being added to queue",description="**["+data.get('title')+"](https://www.youtube.com/watch?v="+data.get('id')+")**",colour= random.randint(0, 0xffffff))
+      notif = discord.Embed(title="Playlist added/being added to queue",description="**["+data.get('title')+"]("+data.get('url')+")**",colour= random.randint(0, 0xffffff))
       notif.add_field(name="**Till Played**",value="`"+dtp+"`",inline=True)
       notif.add_field(name="**Song Duration**",value="`"+duration+"`",inline=True)
       notif.add_field(name="**Position**",value=position,inline=False)
