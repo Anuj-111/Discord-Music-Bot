@@ -227,7 +227,7 @@ class Music(commands.Cog):
     if serverId in db:
        del db[serverId]
        del s_opts[serverId]
-    if voice and voice.is_connected() and ctx.author.voice and ctx.author.voice.channel == voice.channel:
+    if voice and voice.is_connected() and len(voice.channel.members) == 1 or ctx.author.voice and ctx.author.voice.channel == voice.channel:
       if serverId in self.player:
         if self.player[serverId].loop == True:
           self.player[serverId].set_loop(False)
@@ -236,7 +236,7 @@ class Music(commands.Cog):
       await voice.disconnect()
       await self.timer.delentry(ctx.guild.id)   
     else:
-      await ctx.send("**User isn't connected to Bot's voice channel or bot isn't connected**")
+      await ctx.send("**User isn't connected to bot's voice channel or bot isn't connected**")
 
   @commands.command(aliases=['q'],pass_context= True)
   async def queue(self,ctx):
