@@ -93,6 +93,7 @@ class Source(discord.PCMVolumeTransformer):
         super().__init__(source, volume)
         self.data = data
         self.id = data.get('id',None)
+        self.url = data.get('url',None)
         self.title = data.get('title',None)
         self.duration = data.get('duration',None)
         self.thumbnail = data.get('thumbnail',None)
