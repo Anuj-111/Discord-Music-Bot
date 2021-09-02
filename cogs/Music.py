@@ -199,14 +199,13 @@ class Music(commands.Cog):
             self.player[ctx.guild.id].set_loop(False)
         self.timer.setentry(ctx.guild.id,2)
     
-       
+   
 
   @commands.Cog.listener()
   async def on_command_completion(self,ctx):
     if ctx.guild.id in self.player:
-      await self.timer.delentry(ctx.guild.id)   
-
-
+      await self.timer.delentry(ctx.guild.id)
+           
   @commands.command(aliases=['h'],pass_context= True)
   async def help(self,ctx):
     embed = discord.Embed(title="Google Docs documentation",description="**[Link to documentation](https://1pt.co/music)**",colour= random.randint(0, 0xffffff))
@@ -224,7 +223,7 @@ class Music(commands.Cog):
     channel = await self.checkconditions(ctx,voice)
     if channel is None:
       return
-    if not self.timer.checkentry(ctx.guild.id):   
+    if not ctx.guild.id in self.player and not self.timer.checkentry(ctx.guild.id):   
       self.timer.setentry(ctx.guild.id,1)
     
   @commands.command(aliases=['leav','dc','leave','stop'],pass_context = True)
@@ -446,7 +445,7 @@ class Music(commands.Cog):
     livestream = False
     
     if request is None:
-      if voice and not voice.is_playing() and not self.timer.checkentry(ctx.guild.id):
+      if not ctx.guild.id in self.player and not self.timer.checkentry(ctx.guild.id):
         self.timer.setentry(ctx.guild.id,1)
       return
     
@@ -517,9 +516,9 @@ class Music(commands.Cog):
     channel = await self.checkconditions(ctx,voice)
     if channel is None:
       return
-
+    
     if request is None:
-      if voice and not voice.is_playing() and not self.timer.checkentry(ctx.guild.id):
+      if not ctx.guild.id in self.player and not self.timer.checkentry(ctx.guild.id):
         self.timer.setentry(ctx.guild.id,1)
       return
     livestream = False
@@ -592,7 +591,7 @@ class Music(commands.Cog):
     if channel is None:
       return
     if request is None:
-      if voice and not voice.is_playing() and not self.timer.checkentry(ctx.guild.id):
+      if not ctx.guild.id in self.player and not self.timer.checkentry(ctx.guild.id):
         self.timer.setentry(ctx.guild.id,1)
       return
 
@@ -733,7 +732,7 @@ class Music(commands.Cog):
       await ctx.send("```css\n"+str(count)+" entries by:"+str(name.name)+" have been cleared from Queue 🧹```")
 
   @commands.command(aliases=['searc','s'],pass_context = True)
-  async def search(self,ctx):
+  async def search(self,ctx,*,request):
     voice = discord.utils.get(self.bot.voice_clients, guild=ctx.guild)
     if isinstance(ctx.channel, discord.DMChannel):
       await ctx.send('Use Arctic-Chan in a server please.')
@@ -742,9 +741,6 @@ class Music(commands.Cog):
     channel = await self.checkconditions(ctx,voice)
     if channel is None:
       return
-    request = ctx.message.content.split(" ",1)[1] if len(ctx.message.content.split(" ",1)) > 1 else None
-    if not request:
-      return None
 
     await ctx.send("`Searching for "+request+" on Youtube`")
     try:
