@@ -543,7 +543,8 @@ class Music(commands.Cog):
     if serverId in self.player:
       if self.player[serverId].loop == True:
         self.player[serverId].set_loop(False)
-      if voice.is_playing() or voice.is_paused():
+      voice = discord.utils.get(self.bot.voice_clients, guild=ctx.guild)
+      if voice and voice.is_playing() or voice.is_paused():
         voice.stop()
       await ctx.send("```Song has been skipped⏭️```")
     else:
