@@ -37,7 +37,7 @@ class Timer():
     def delentry(self,serverId):
       for key in self.check:
           if serverId in self.check[key]:
-              del self.check[key][serverId]
+              self.check[key].remove(serverId)
 
 
     @tasks.loop(seconds=60) 
