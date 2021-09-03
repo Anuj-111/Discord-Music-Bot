@@ -120,6 +120,7 @@ class Source(discord.PCMVolumeTransformer):
         'format': 'bestaudio/best',
         'restrictfilenames': True,
         'noplaylist': npl,
+        'playlistend':25,
         'verbose': False,
         'quiet': True,
         'default_search': 'auto',
