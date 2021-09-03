@@ -426,8 +426,6 @@ class Music(commands.Cog):
               
   @commands.command(aliases=['pt'],pass_context = True)
   async def playtop(self,ctx,*,request=None):
-
-    voice = discord.utils.get(self.bot.voice_clients, guild=ctx.guild)
     if isinstance(ctx.channel, discord.DMChannel):
       await ctx.send(f'Use {self.bot.user.name} in a server please.')
       return None
@@ -498,7 +496,6 @@ class Music(commands.Cog):
   @commands.command(aliases=['ps'],pass_context = True)
   async def playskip(self,ctx,*,request=None):
     
-    voice = discord.utils.get(self.bot.voice_clients, guild=ctx.guild)
     if isinstance(ctx.channel, discord.DMChannel):
       await ctx.send(f'Use {self.bot.user.name} in a server please.')
       return None
@@ -570,7 +567,6 @@ class Music(commands.Cog):
 
   @commands.command(aliases=['p','pla'],pass_context = True)
   async def play(self,ctx,*,request=None):
-    voice = discord.utils.get(self.bot.voice_clients, guild=ctx.guild)
     
     if isinstance(ctx.channel, discord.DMChannel):
       await ctx.send(f'Use {self.bot.user.name} in a server please.')
