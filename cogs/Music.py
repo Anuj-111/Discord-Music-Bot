@@ -79,20 +79,18 @@ class Timer():
         if minute >= 60:
             minute -= 60
         if minute in self.check:
-            self.check[str(minute)][serverId] = True
+            self.check[str(minute)].add(serverId) 
         else:
-            self.check[str(minute)] = {}
-            self.check[str(minute)][serverId] = True
+            self.check[str(minute)] = set({serverId})
       elif entryid == 2:
         now = datetime.datetime.now()
         minute = now.minute + 3 if now.second < 30 else now.minute + 4
         if minute >= 60:
             minute -= 60
         if minute in self.check2:
-            self.check2[str(minute)][serverId] = True
+            self.check2[str(minute)].add(serverId) 
         else:
-            self.check2[str(minute)] = {}
-            self.check2[str(minute)][serverId] = True
+            self.check2[str(minute)] = set({serverId})
 
     
 
