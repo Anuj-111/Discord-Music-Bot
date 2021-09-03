@@ -2,10 +2,10 @@ import os, json,shutil
 import time
 import random
 import asyncio
-from discord.channel import VoiceChannel
 import yt_dlp
 from yt_dlp import DownloadError
 import discord
+from discord.channel import VoiceChannel
 from discord.ext import commands,tasks
 from youtube_search import YoutubeSearch 
 import datetime
@@ -203,8 +203,8 @@ class Music(commands.Cog):
   @commands.command(aliases=['h'],pass_context= True)
   async def help(self,ctx):
     embed = discord.Embed(title="Google Docs documentation",description="**[Link to documentation](https://1pt.co/music)**",colour= random.randint(0, 0xffffff))
-    embed.add_field(name='\u200b',value="Made by:[Param Thakkar](https://www.param.me/)",inline=False)
-    embed.set_author(name="Arctic Chan",icon_url=self.bot.user.avatar_url)
+    embed.add_field(name='\u200b',value="Doc Written by:[Param Thakkar](https://www.param.me/)",inline=False)
+    embed.set_author(name=f'{self.bot.user.name}',icon_url=self.bot.user.avatar_url)
     await ctx.send(embed=embed)
   
    
@@ -390,7 +390,7 @@ class Music(commands.Cog):
     serverId = ctx.guild.id
     if serverId in self.player:
       embed = discord.Embed(title="**["+self.player[serverId].title+"]"+"("+self.player[serverId].url+")**",description = "```Song requested by: "+self.player[serverId].author+"||"+self.toHMS(self.player[serverId].duration),colour = 0xffa826)
-      embed.set_footer(text="`Saved by Arctic Chan in "+ctx.guild+" at "+str(ctx.message.created_at)+"`")
+      embed.set_footer(text=f"`Saved by {self.bot.user.name} in "+ctx.guild+" at "+str(ctx.message.created_at)+"`")
       user = await ctx.author.create_dm()
       await user.send(embed=embed)
 
@@ -464,7 +464,7 @@ class Music(commands.Cog):
 
     playlist = True if 'list=' in info else False
     song_info = {'video':info.get('url',None), 'url': request,'id':info.get('id',None),'title':info.get('title',None),'duration':info.get('duration',None),'thumbnail':info.get('thumbnail',None),'channel':info.get('channel',None),'tags':info.get('tags',None)[:3] if info.get('tags',None) else None,'author': str(ctx.author),'ls':livestream}
-
+    await ctx.send(song_info['video'])
     if serverId in self.player:
       db[serverId].insert(0,song_info)
       await self.addedtoqueue(ctx,song_info,playlist,1,thumbnail=song_info.get('thumbnail',None))

@@ -2,7 +2,10 @@ import asyncio
 import os
 import discord
 from discord.ext import commands
-import datetime
+
+
+_admins = [278646990777221120]
+
 
 
 bot = commands.Bot(command_prefix = "!",case_insensitive =True,activity = discord.Game(name="Music for your ❤️"))
@@ -22,19 +25,19 @@ async def on_command_error(ctx, error):
 
 @bot.command()
 async def load(ctx,extension):
-  if ctx.author.id == 278646990777221120:
+  if ctx.author.id in _admins:
     bot.load_extension(f'cogs.{extension}')
     await ctx.send("{} loaded".format(extension))
   
 @bot.command()
 async def unload(ctx,extension):
-  if ctx.author.id == 278646990777221120:
+  if ctx.author.id in _admins:
     bot.unload_extension(f'cogs.{extension}')
     await ctx.send("{} unloaded".format(extension))
   
 @bot.command()
 async def reload(ctx,extension):
-  if ctx.author.id == 278646990777221120:
+  if ctx.author.id in _admins:
     bot.unload_extension(f'cogs.{extension}')
     bot.load_extension(f'cogs.{extension}')
     await ctx.send("{} reloaded".format(extension))
