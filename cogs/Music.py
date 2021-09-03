@@ -122,10 +122,10 @@ class Source(discord.PCMVolumeTransformer):
         'noplaylist': npl,
         'playlistend':25,
         'verbose': False,
-        'quiet': True,
+        'quiet': True, 
         'default_search': 'auto',
         'nocheckcertificate': True,
-        'ignoreerrors': False,
+        'ignoreerrors': True,
         'no_warnings': False,
         'source_address': '0.0.0.0' # bind to ipv4 since ipv6 addresses cause issues sometimes
         }
