@@ -464,7 +464,6 @@ class Music(commands.Cog):
 
     playlist = True if 'list=' in info else False
     song_info = {'video':info.get('url',None), 'url': request,'id':info.get('id',None),'title':info.get('title',None),'duration':info.get('duration',None),'thumbnail':info.get('thumbnail',None),'channel':info.get('channel',None),'tags':info.get('tags',None)[:3] if info.get('tags',None) else None,'author': str(ctx.author),'ls':livestream}
-    await ctx.send(song_info['video'])
     if serverId in self.player:
       db[serverId].insert(0,song_info)
       await self.addedtoqueue(ctx,song_info,playlist,1,thumbnail=song_info.get('thumbnail',None))
