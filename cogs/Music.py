@@ -461,7 +461,7 @@ class Music(commands.Cog):
      
 
     playlist = True if 'list=' in info else False
-    song_info = {'video':info.get('url',None), 'url': request,'id':info.get('id',None),'title':info.get('title',None),'duration':info.get('duration',None),'thumbnail':info.get('thumbnail',None),'channel':info.get('channel',None),'tags':info.get('tags',None)[:3] if info.get('tags',None) else None,'author': str(ctx.author),'ls':livestream}
+    song_info = {'video':info.get('url',None), 'url': request,'id':info.get('id',None),'title':info.get('title',None),'duration':info.get('duration',1),'thumbnail':info.get('thumbnail',None),'channel':info.get('channel',None),'tags':info.get('tags',None)[:3] if info.get('tags',None) else None,'author': str(ctx.author),'ls':livestream}
     if serverId in self.player:
       db[serverId].insert(0,song_info)
       await self.addedtoqueue(ctx,song_info,playlist,1,thumbnail=song_info.get('thumbnail',None))
@@ -534,7 +534,7 @@ class Music(commands.Cog):
       livestream = True
 
     playlist = True if "list=" in request else False
-    song_info = {'video':info.get('url',None), 'url': request,'id':info.get('id',None),'title':info.get('title',None),'duration':info.get('duration',None),'thumbnail':info.get('thumbnail',None),'channel':info.get('channel',None),'tags':info.get('tags',None)[:3] if info.get('tags',None) else None,'author': str(ctx.author),'ls':livestream}
+    song_info = {'video':info.get('url',None), 'url': request,'id':info.get('id',None),'title':info.get('title',None),'duration':info.get('duration',1),'thumbnail':info.get('thumbnail',None),'channel':info.get('channel',None),'tags':info.get('tags',None)[:3] if info.get('tags',None) else None,'author': str(ctx.author),'ls':livestream}
 
     db[serverId].insert(0,song_info)
     await self.addedtoqueue(ctx,song_info,playlist,0,thumbnail=song_info.get('thumbnail',None))
@@ -601,12 +601,14 @@ class Music(commands.Cog):
       if "entries" in info:
         info = info['entries'][0]
 
-    if info['is_live']or info['duration'] == 0.0:
+    if 'is_live' in info  and info['is_live']  or 'duration' in info and not info['duration']:
       livestream = True
 
     playlist = True if 'list=' in request else False
-    song_info = {'video':info.get('url',None), 'url': request,'id':info.get('id',None),'title':info.get('title',None),'duration':info.get('duration',None),'thumbnail':info.get('thumbnail',None),'channel':info.get('channel',None),'tags':info.get('tags',None)[:3] if info.get('tags',None) else None,'author': str(ctx.author),'ls':livestream}
-   
+    
+    song_info = {'video':info.get('url',None), 'url': request,'id':info.get('id',None),'title':info.get('title',None),'duration':info.get('duration',1),'thumbnail':info.get('thumbnail',None),'channel':info.get('channel',None),'tags':info.get('tags',None)[:3] if info.get('tags',None) else None,'author': str(ctx.author),'ls':livestream}
+    
+
     if serverId in self.player:
       db[serverId].append(song_info)
       await self.addedtoqueue(ctx,song_info,playlist,len(db[serverId]),thumbnail=song_info.get('thumbnail',None))
@@ -744,7 +746,8 @@ class Music(commands.Cog):
         if ytrequest['videos'][value-1]['publish_time'] == 0:
           livestream = True
         serverId = ctx.guild.id
-        db[serverId].append({'video':info.get('url',None), 'url': request,'id':info.get('id',None),'title':info.get('title',None),'duration':info.get('duration',None),'thumbnail':info.get('thumbnail',None),'channel':info.get('channel',None),'tags':info.get('tags',None)[:3] if info.get('tags',None) else None,'author': str(ctx.author),'ls':livestream})
+        db[serverId].append((x:={'video':info.get('url',None), 'url': request,'id':info.get('id',None),'title':info.get('title',None),'duration':info.get('duration',1),'thumbnail':info.get('thumbnail',None),'channel':info.get('channel',None),'tags':info.get('tags',None)[:3] if info.get('tags',None) else None,'author': str(ctx.author),'ls':livestream}))
+        await self.addedtoqueue(ctx,x,False,len(db[serverId]),thumbnail=x.get('thumbnail',None))
         if not serverId in self.player:
           self.playmusic(ctx,serverId)
       
