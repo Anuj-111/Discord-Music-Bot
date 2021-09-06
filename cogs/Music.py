@@ -102,7 +102,7 @@ class Source(discord.PCMVolumeTransformer):
         self.id = data.get('id',None)
         self.url = data.get('url',None)
         self.title = data.get('title',None)
-        self.duration = data.get('duration',None)
+        self.duration = data.get('duration',None) 
         self.thumbnail = data.get('thumbnail',None)
         self.channel = data.get('channel',None)
         self.tags = data.get('tags',None)
@@ -332,7 +332,7 @@ class Music(commands.Cog):
         progressbar = self.progressbar(timepassed,self.player[id].duration)
         queuetime = self.toHMS(timepassed)+"/"+self.toHMS(self.player[id].duration)
       else:
-        queuetime = "infite?-looped"
+        queuetime = "Infite or Looped"
         progressbar = self.progressbar(0,100)
         
       embed = discord.Embed(title="`"+queuetime+"`",description=progressbar,colour=0x000000)
@@ -456,12 +456,12 @@ class Music(commands.Cog):
       if 'entries' in info: 
         info = info['entries'][0]
 
-    if 'is_live' in info  and info['is_live']  or 'duration' in info and not info['duration']:
+    if 'is_live' in info and info['is_live'] or 'duration' in info and not info['duration']:
       livestream = True
      
 
     playlist = True if 'list=' in info else False
-    song_info = {'video':info.get('url',None), 'url': request,'id':info.get('id',None),'title':info.get('title',None),'duration':info.get('duration',1),'thumbnail':info.get('thumbnail',None),'channel':info.get('channel',None),'tags':info.get('tags',None)[:3] if info.get('tags',None) else None,'author': str(ctx.author),'ls':livestream}
+    song_info = {'video':info.get('url',None), 'url': request,'id':info.get('id',None),'title':info.get('title',None),'duration':int(info.get('duration',None)) if info.get('duration',None) else None,'thumbnail':info.get('thumbnail',None),'channel':info.get('channel',None),'tags':info.get('tags',None)[:3] if info.get('tags',None) else None,'author': str(ctx.author),'ls':livestream}
     if serverId in self.player:
       db[serverId].insert(0,song_info)
       await self.addedtoqueue(ctx,song_info,playlist,1,thumbnail=song_info.get('thumbnail',None))
@@ -483,7 +483,7 @@ class Music(commands.Cog):
     if "entries" in info2:
       del info2["entries"][0]
       for entry in reversed(info2["entries"]):
-        db[serverId].insert(0,{'video':entry.get('url',None),'url':entry.get('webpage_url',None),'thumbnail':entry.get('thumbnail',None),'channel':entry.get('channel',None),'tags':entry.get('tags',None)[:3] if entry.get('tags',None) else None,'id':entry.get('id',None),'title':entry.get('title',None),'duration':entry.get('duration',None),'author': str(ctx.author),'ls':False})
+        db[serverId].insert(0,{'video':entry.get('url',None),'url':entry.get('webpage_url',None),'thumbnail':entry.get('thumbnail',None),'channel':entry.get('channel',None),'tags':entry.get('tags',None)[:3] if entry.get('tags',None) else None,'id':entry.get('id',None),'title':entry.get('title',None),'duration':int(entry.get('duration',None)) if info.get('duration',None) else None,'author': str(ctx.author),'ls':False})
       if firstsong:
         db[serverId].insert(0,firstsong)
     else:
@@ -534,7 +534,7 @@ class Music(commands.Cog):
       livestream = True
 
     playlist = True if "list=" in request else False
-    song_info = {'video':info.get('url',None), 'url': request,'id':info.get('id',None),'title':info.get('title',None),'duration':info.get('duration',1),'thumbnail':info.get('thumbnail',None),'channel':info.get('channel',None),'tags':info.get('tags',None)[:3] if info.get('tags',None) else None,'author': str(ctx.author),'ls':livestream}
+    song_info = {'video':info.get('url',None), 'url': request,'id':info.get('id',None),'title':info.get('title',None),'duration':int(info.get('duration',None)) if info.get('duration',None) else None,'thumbnail':info.get('thumbnail',None),'channel':info.get('channel',None),'tags':info.get('tags',None)[:3] if info.get('tags',None) else None,'author': str(ctx.author),'ls':livestream}
 
     db[serverId].insert(0,song_info)
     await self.addedtoqueue(ctx,song_info,playlist,0,thumbnail=song_info.get('thumbnail',None))
@@ -558,7 +558,7 @@ class Music(commands.Cog):
     if "entries" in info2:
       del info2["entries"][0]
       for entry in reversed(info2["entries"]):
-         db[serverId].insert(0,{'video':entry.get('url',None),'url':entry.get('webpage_url',None),'thumbnail':entry.get('thumbnail',None),'channel':entry.get('channel',None),'tags':entry.get('tags',None)[:3] if entry.get('tags',None) else None,'id':entry.get('id',None),'title':entry.get('title',None),'duration':entry.get('duration',None),'author': str(ctx.author),'ls':False})
+         db[serverId].insert(0,{'video':entry.get('url',None),'url':entry.get('webpage_url',None),'thumbnail':entry.get('thumbnail',None),'channel':entry.get('channel',None),'tags':entry.get('tags',None)[:3] if entry.get('tags',None) else None,'id':entry.get('id',None),'title':entry.get('title',None),'duration':int(entry.get('duration',None)) if info.get('duration',None) else None,'author': str(ctx.author),'ls':False})
     else:
       return None
       
@@ -606,7 +606,7 @@ class Music(commands.Cog):
 
     playlist = True if 'list=' in request else False
     
-    song_info = {'video':info.get('url',None), 'url': request,'id':info.get('id',None),'title':info.get('title',None),'duration':info.get('duration',1),'thumbnail':info.get('thumbnail',None),'channel':info.get('channel',None),'tags':info.get('tags',None)[:3] if info.get('tags',None) else None,'author': str(ctx.author),'ls':livestream}
+    song_info = {'video':info.get('url',None), 'url': request,'id':info.get('id',None),'title':info.get('title',None),'duration':int(info.get('duration',None)) if info.get('duration',None) else None,'thumbnail':info.get('thumbnail',None),'channel':info.get('channel',None),'tags':info.get('tags',None)[:3] if info.get('tags',None) else None,'author': str(ctx.author),'ls':livestream}
     
 
     if serverId in self.player:
@@ -626,7 +626,7 @@ class Music(commands.Cog):
     if "entries" in info2:
       del info2["entries"][0]
       for entry in info2["entries"]:
-        db[serverId].append({'video':entry.get('url',None),'url':entry.get('webpage_url',None),'thumbnail':entry.get('thumbnail',None),'channel':entry.get('channel',None),'tags':entry.get('tags',None)[:3] if entry.get('tags',None) else None,'id':entry.get('id',None),'title':entry.get('title',None),'duration':entry.get('duration',None),'author': str(ctx.author),'ls':False})
+        db[serverId].append({'video':entry.get('url',None),'url':entry.get('webpage_url',None),'thumbnail':entry.get('thumbnail',None),'channel':entry.get('channel',None),'tags':entry.get('tags',None)[:3] if entry.get('tags',None) else None,'id':entry.get('id',None),'title':entry.get('title',None),'duration':int(entry.get('duration',None)) if info.get('duration',None) else None,'author': str(ctx.author),'ls':False})
     else:
       return None
     
@@ -746,7 +746,7 @@ class Music(commands.Cog):
         if ytrequest['videos'][value-1]['publish_time'] == 0:
           livestream = True
         serverId = ctx.guild.id
-        db[serverId].append((x:={'video':info.get('url',None), 'url': request,'id':info.get('id',None),'title':info.get('title',None),'duration':info.get('duration',1),'thumbnail':info.get('thumbnail',None),'channel':info.get('channel',None),'tags':info.get('tags',None)[:3] if info.get('tags',None) else None,'author': str(ctx.author),'ls':livestream}))
+        db[serverId].append((x:={'video':info.get('url',None), 'url': request,'id':info.get('id',None),'title':info.get('title',None),'duration':int(info.get('duration',None)) if info.get('duration',None) else None,'thumbnail':info.get('thumbnail',None),'channel':info.get('channel',None),'tags':info.get('tags',None)[:3] if info.get('tags',None) else None,'author': str(ctx.author),'ls':livestream}))
         await self.addedtoqueue(ctx,x,False,len(db[serverId]),thumbnail=x.get('thumbnail',None))
         if not serverId in self.player:
           self.playmusic(ctx,serverId)
@@ -816,7 +816,16 @@ class Music(commands.Cog):
         else:
           speed = float(s_opts[serverId][1]['temp']['speed'].split("=")[1][:-1])
 
-      if int((timepassed*speed) +value)> self.player[serverId].duration:
+
+      if self.player[serverId].ls is True:
+        if self.player[serverId].duration is None:
+          self.player[serverId].duration = timepassed*speed
+          await ctx.send("You can't forward that far")
+          return None
+        elif int((timepassed*speed) +value) > self.player[serverId].duration:
+          await ctx.send("You can't forward that far")
+          return None
+      elif int((timepassed*speed) +value)> self.player[serverId].duration:
         await ctx.send("You can't forward that far")
         return None
     
@@ -845,12 +854,17 @@ class Music(commands.Cog):
       else:
         timepassed = int(self.player[serverId].timeq[2]-self.player[serverId].timeq[0])
 
+
       speed = 1
       if 'speed' in s_opts[serverId][1]['temp']:
         if len(s_opts[serverId][1]['temp']['speed']) > 12:
           speed = 4
         else:
           speed = float(s_opts[serverId][1]['temp']['speed'].split("=")[1][:-1])
+
+      if self.player[serverId].ls is True:
+        if self.player[serverId].duration is None or timepassed*speed > self.player[serverId].duration:
+          self.player[serverId].duration = timepassed*speed
 
       if value > timepassed*speed:
         await ctx.send("You can't rewind that far")
@@ -1283,7 +1297,7 @@ class Music(commands.Cog):
     if isinstance(data['duration'],int) and data['duration'] != 0:
       duration = self.toHMS(data['duration'])
     else:
-      duration = "livestream"
+      duration = "Livestream"
     if position != "Currently Playing":
       dtp = self.toHMS(self.durationtillplay(serverId,int(position))) 
     else:
