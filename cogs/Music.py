@@ -456,7 +456,7 @@ class Music(commands.Cog):
       if 'entries' in info: 
         info = info['entries'][0]
 
-    if info['is_live'] == True or info['duration'] == 0.0:
+    if info['is_live'] or not info['duration']:
       livestream = True
      
 
@@ -530,7 +530,7 @@ class Music(commands.Cog):
       if 'entries' in info:
         info = info['entries'][0]
         
-    if info['is_live'] == True or info['duration'] == 0.0:
+    if info['is_live'] or info['duration'] == 0.0:
       livestream = True
 
     playlist = True if "list=" in request else False
@@ -601,7 +601,7 @@ class Music(commands.Cog):
       if "entries" in info:
         info = info['entries'][0]
 
-    if info['is_live'] == True or info['duration'] == 0.0:
+    if info['is_live']or info['duration'] == 0.0:
       livestream = True
 
     playlist = True if 'list=' in request else False
