@@ -4,3 +4,4 @@ discord.py[voice]==1.7
 youtube-search==2.1.0
 async-timeout==3.0.1
 lyricsgenius==3.0.1
+pydantic
