@@ -456,7 +456,7 @@ class Music(commands.Cog):
       if 'entries' in info: 
         info = info['entries'][0]
 
-    if info['is_live'] or not info['duration']:
+    if 'is_live' in info  and info['is_live']  or 'duration' in info and not info['duration']:
       livestream = True
      
 
