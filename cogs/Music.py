@@ -818,6 +818,8 @@ class Music(commands.Cog):
 
 
       if self.player[serverId].ls is True:
+        await ctx.send('Livestream forwarding not setup yet!')
+        """
         if self.player[serverId].duration is None:
           self.player[serverId].duration = timepassed*speed
           await ctx.send("You can't forward that far")
@@ -825,10 +827,11 @@ class Music(commands.Cog):
         elif int((timepassed*speed) +value) > self.player[serverId].duration:
           await ctx.send("You can't forward that far")
           return None
+        """
       elif int((timepassed*speed) +value)> self.player[serverId].duration:
         await ctx.send("You can't forward that far")
         return None
-    
+        
       if speed == 1:
         timetoreset = [(timepassed + value), -(timepassed + value)]
       else:
@@ -862,9 +865,11 @@ class Music(commands.Cog):
         else:
           speed = float(s_opts[serverId][1]['temp']['speed'].split("=")[1][:-1])
 
+      """
       if self.player[serverId].ls is True:
         if self.player[serverId].duration is None or timepassed*speed > self.player[serverId].duration:
           self.player[serverId].duration = timepassed*speed
+      """
 
       if value > timepassed*speed:
         await ctx.send("You can't rewind that far")
