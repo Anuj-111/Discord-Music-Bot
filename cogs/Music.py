@@ -819,6 +819,7 @@ class Music(commands.Cog):
 
       if self.player[serverId].ls is True:
         await ctx.send('Livestream forwarding not setup yet!')
+        return None
         """
         if self.player[serverId].duration is None:
           self.player[serverId].duration = timepassed*speed
