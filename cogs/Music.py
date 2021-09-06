@@ -872,7 +872,10 @@ class Music(commands.Cog):
           self.player[serverId].duration = timepassed*speed
       """
 
-      if value > timepassed*speed:
+      if self.player[serverId].ls is True:
+        await ctx.send('Livestream forwarding not setup yet!')
+        return None
+      elif value > timepassed*speed:
         await ctx.send("You can't rewind that far")
         return None
         
