@@ -28,7 +28,7 @@ class Music(commands.Cog):
     if isinstance(ctx.channel, discord.DMChannel):
       await ctx.send(f'Use {self.bot.user.name} in a server please.')
       return None
-    if not(x := await Events.checkconditions(ctx)):
+    if not(x := await Events.checkconditions(self.bot,ctx)):
       return
 
   @commands.command(aliases=['leav','dc','leave','stop'],pass_context = True)
@@ -40,7 +40,7 @@ class Music(commands.Cog):
     serverId = ctx.guild.id
     if serverId in tracks:
        del tracks[serverId]
-       del s_opts[serverId]
+       del s_opts[serverId][1][serverId]
     if voice and voice.is_connected():
       if len(voice.channel.members) == 1 or ctx.author.voice and ctx.author.voice.channel == voice.channel:
         if serverId in player:
@@ -63,22 +63,24 @@ class Music(commands.Cog):
     
     serverId = ctx.guild.id
     playlist = True if 'list=' in request else False #Need to evaluate early to send user this check before first song is played
-    search = s_opts['search']
+    
 
     if isinstance(ctx.channel, discord.DMChannel): #No point of putting this in another function
       await ctx.send(f'Use {self.bot.user.name} in a server please.')
       return None
 
-    if not (x := await Events.checkconditions(ctx)) or request is None: #Allow the user to summon bot(join) without making a request
+    if not (x := await Events.checkconditions(self.bot,ctx)) and request is None: #Allow the user to summon bot(join) without making a request
       return
-
-   
-    await ctx.send(f"`Attempting to request: {request}`")
-    if (video:= FetchVideo.get_singlevideo(str(ctx.author),request,search)) is None: 
-        await ctx.send("Error Occured while fetching video.")
-        return
     
 
+    await ctx.send(f"`Attempting to request: {request}`")
+    if (video:= await FetchVideo().get_singlevideo(str(ctx.author),request,search = s_opts[serverId][1]['search'])) is None: 
+        await ctx.send("Error occured while fetching video.")
+        return
+    
+    request = video.url
+
+    
     tracks[serverId].append(video)
     message = await Events.addedtoqueue(ctx,video,playlist,len(tracks[serverId]),thumbnail=video.thumbnail)
     await ctx.send(embed=message)
@@ -90,8 +92,8 @@ class Music(commands.Cog):
 
     if playlist is True: #Playlist and first song is split because playlist takes time to load. We'll let the first song play while playlist song queues up. 
 
-        if (videos:= FetchVideo.get_playlist(str(ctx.author),request)) is None: 
-          await ctx.send("Error Occured while fetching playlist")
+        if (videos:= await FetchVideo().get_playlist(str(ctx.author),request)) is None: 
+          await ctx.send("Error occured while fetching playlist")
           return
         
         tracks[serverId].extend(videos)
@@ -102,21 +104,22 @@ class Music(commands.Cog):
 
     serverId = ctx.guild.id
     playlist = True if 'list=' in request else False #Need to evaluate early to send user this check before first song is played
-    search = s_opts['search']
+    
 
     if isinstance(ctx.channel, discord.DMChannel):
       await ctx.send(f'Use {self.bot.user.name} in a server please.')
       return None
 
-    if not (x := await Events.checkconditions(ctx)) or request is None: #Allow the user to summon bot(join) without making a request
+    if not (x := await Events.checkconditions(self.bot,ctx)) and request is None: #Allow the user to summon bot(join) without making a request
       return
 
     await ctx.send(f"`Attempting to request: {request}`")
-    if (video:= FetchVideo.get_singlevideo(str(ctx.author),request,search)) is None: 
-      await ctx.send("Error Occured while fetching video.")
+    if (video:= await FetchVideo().get_singlevideo(str(ctx.author),request,search = s_opts[serverId][1]['search'])) is None: 
+      await ctx.send("Error occured while fetching video.")
       return
-    
-    
+
+    request = video.url
+  
     tracks[serverId].insert(0,video)
     message = await Events.addedtoqueue(ctx,video,playlist,0,thumbnail=video.thumbnail)
     await ctx.send(embed=message)
@@ -133,8 +136,8 @@ class Music(commands.Cog):
     
       
     if playlist is True:
-      if (videos:= FetchVideo.get_playlist(str(ctx.author),request)) is None: 
-        await ctx.send("Error Occured while fetching playlist")
+      if (videos:= await FetchVideo().get_playlist(str(ctx.author),request)) is None: 
+        await ctx.send("Error occured while fetching playlist")
         return
 
       
@@ -146,20 +149,22 @@ class Music(commands.Cog):
 
     serverId = ctx.guild.id
     playlist = True if 'list=' in request else False #Need to evaluate early to send user this check before first song is played
-    search = s_opts['search']
+    search = "auto"#s_opts[serverId][1]['search']
 
     if isinstance(ctx.channel, discord.DMChannel):
       await ctx.send(f'Use {self.bot.user.name} in a server please.')
       return None
 
-    if not (x := await Events.checkconditions(ctx)) or request is None: #Allow the user to summon bot(join) without making a request
+    if not (x := await Events.checkconditions(self.bot,ctx)) and request is None: #Allow the user to summon bot(join) without making a request
       return
 
     await ctx.send(f"`Attempting to request: {request}`")
-    if (video:= FetchVideo.get_singlevideo(str(ctx.author),request,search)) is None: 
-      await ctx.send("Error Occured while fetching video.")
+    if (video:= await FetchVideo().get_singlevideo(str(ctx.author),request,search=s_opts[serverId][1]['search'])) is None: 
+      await ctx.send("Error occured while fetching video.")
       return
     
+
+    request = video.url
     tracks[serverId].insert(0,video)
 
     if serverId in player:
@@ -172,8 +177,8 @@ class Music(commands.Cog):
       playmusic(ctx,serverId)
     
     if playlist is True:
-      if (videos:= FetchVideo.get_playlist(str(ctx.author),request)) is None: 
-        await ctx.send("Error Occured while fetching playlist")
+      if (videos:= await FetchVideo().get_playlist(str(ctx.author),request)) is None: 
+        await ctx.send("Error occured while fetching playlist")
         return
    
       if serverId in tracks and tracks[serverId]:
@@ -191,7 +196,6 @@ class Music(commands.Cog):
         return None
 
 
-
-
 def setup(bot):
   bot.add_cog(Music(bot))
+  

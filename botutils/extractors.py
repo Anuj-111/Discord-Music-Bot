@@ -1,5 +1,3 @@
-from botutils.fetchvideo import Video
-
 from enum import Enum,auto
 import asyncio
 from abc import ABC, abstractmethod
@@ -16,7 +14,7 @@ class Extractors(ABC):
 class DefaultExtractor(Extractors):
 
     """Fetches video info from yt-dlp"""
-    async def extract(author:str,url:str,search:str, npl:str=True)->Video:
+    async def extract(author:str,url:str,search:str, npl:str=True):
         ytdl_format_options = {
             'format': 'bestaudio/best',
             'restrictfilenames': True,
@@ -36,7 +34,8 @@ class DefaultExtractor(Extractors):
         try:
           loop = asyncio.get_event_loop()
           data = await loop.run_in_executor(None, lambda: ytdl.extract_info(url, download=False))
-          data.update({'author': author})
+          data['author'] = author
+          print(data)
           return data
         except Exception as e:
           print(e)

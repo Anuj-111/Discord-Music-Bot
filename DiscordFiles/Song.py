@@ -11,7 +11,7 @@ from source import playmusic
 import time
 
 import discord
-from discord import commands
+from discord.ext import commands
 
 class Song(commands.Cog):
     def __init__(self,bot):

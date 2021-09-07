@@ -14,10 +14,10 @@ from typing import Optional,FrozenSet
 
 
 class Video(MyModel):
-    webpage_url: str = Field(alias='url')
+    url: str = Field(alias='webpage_url')
     title: str
-    duration: int 
-    is_live: Optional[bool] = None
+    duration: int
+    ls: Optional[bool] = Field(alias='is_live')
     id: Optional[str] = None
     channel: Optional[str] = None
     thumbnail: Optional[str] = None
@@ -25,7 +25,7 @@ class Video(MyModel):
 
     author: str
 
-
+ 
     @pydantic.validator("title")
     @classmethod
     def check_title(cls,value):
@@ -61,19 +61,17 @@ class FetchVideo():
         
     async def get_singlevideo(self,caller:str,request:str,search:str,setting:str="default")->Video:
         try:
-            return Video(**await self.extractors[setting].extract(caller,request))
+            if not "." in request:
+                request = YoutubeSearch().search(request)
+            return Video(**await self.extractors[setting]().extract(caller,request,search))
         except Exception as e:
-            if not "." in request: #poor yet fullproof way of checking if request is a url
-                request = self.externalsearch[setting].search(request)
-                if not request is None:
-                    return await self.get_singlevideo(caller,request,search,setting=setting)
             print(e)
             return None
 
 
     async def get_playlist(self,caller:str,request:str,setting:str="default")->list:
         try:
-            return [Video(**i) for i in (await self.extractors[setting].extract(caller,request))['entries']]
+            return [Video(**i) for i in (await self.extractors[setting]().extract(caller,request))['entries']]
         except Exception as e:
             print(e)
             return None

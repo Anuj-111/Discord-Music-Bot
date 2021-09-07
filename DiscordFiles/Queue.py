@@ -9,7 +9,7 @@ from storage import tracks
 import random
 
 import discord
-from discord import commands
+from discord.ext import commands
 
 class Queue(commands.Cog):
     def __init__(self,bot):

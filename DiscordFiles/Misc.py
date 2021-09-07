@@ -12,7 +12,7 @@ import asyncio
 
 
 import discord
-from discord import commands
+from discord.ext import commands
 import yt_dlp
 from yt_dlp import DownloadError
 import lyricsgenius
@@ -96,6 +96,38 @@ class Misc(commands.Cog):
         await asyncio.sleep(0.5)
       else:
         await ctx.send("No lyrics found in genius database")
+
+    
+    async def pages(self,msg,contents):
+        pages = len(contents)
+        cur_page = 1
+        message = await msg.channel.send(embed=contents[cur_page-1])
+        # getting the message object for editing and reacting
+
+        await message.add_reaction("◀️")
+        await message.add_reaction("▶️")
+        buttons =  ["◀️", "▶️"]
+
+        while True:
+            try:
+                reaction, user = await self.bot.wait_for("reaction_add", check=lambda reaction,user: user == msg.author and reaction.emoji in buttons, timeout=60)
+
+                if str(reaction.emoji) == "▶️" and cur_page != pages:
+                    cur_page += 1
+                    await message.edit(embed=contents[cur_page-1])
+                    await message.remove_reaction(reaction, user)
+
+                elif str(reaction.emoji) == "◀️" and cur_page > 1:
+                    cur_page -= 1
+                    await message.edit(embed=contents[cur_page-1])
+                    await message.remove_reaction(reaction, user)
+
+                else:
+                    await message.remove_reaction(reaction, user)
+                    
+            except asyncio.TimeoutError:
+                await message.delete()
+                break
   
 
 

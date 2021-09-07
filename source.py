@@ -20,7 +20,7 @@ class Source(discord.PCMVolumeTransformer):
         super().__init__(source, volume)
         self.data = data
         self.id = data.id
-        self.url = data.url or data.webpage_url
+        self.url = data.url 
         self.title = data.title
         self.duration = data.duration 
         self.thumbnail = data.thumbnail

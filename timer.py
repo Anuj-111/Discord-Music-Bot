@@ -82,4 +82,9 @@ class Timer():
         else:
             self.check2[str(minute)] = set({serverId})
 
-gtimer = Timer()
+
+gtimer = None
+
+
+
+

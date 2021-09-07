@@ -1,8 +1,8 @@
 from storage import(
     s_opts,
     tracks,
-    timer
 )
+
 from source import player
 from timer import gtimer
 from botutils.extra import (
@@ -15,7 +15,7 @@ import asyncio
 import random
 
 import discord
-from discord import commands
+from discord.ext import commands
 
 class Events(commands.Cog):
     def __init__(self,bot):
@@ -45,8 +45,9 @@ class Events(commands.Cog):
                 if player[ctx.guild.id].loop:
                     player[ctx.guild.id].set_loop(False)
                 gtimer.setentry(ctx.guild.id,2)
-    
-    async def checkconditions(self,ctx): 
+
+    @staticmethod
+    async def checkconditions(bot,ctx): 
       """Connection event for the bot"""
 
       channel = None
@@ -56,7 +57,7 @@ class Events(commands.Cog):
       except Exception:
         await ctx.send("**User is not in voice Channel**")
         return False
-      voice = discord.utils.get(self.bot.voice_clients, guild=ctx.guild)
+      voice = discord.utils.get(bot.voice_clients, guild=ctx.guild)
       if voice and voice.is_connected():
         if voice.channel.id != channel.id and not voice.channel.members:
           await voice.move_to(channel)
@@ -69,15 +70,19 @@ class Events(commands.Cog):
           await channel.connect(timeout=60.0,reconnect=True)
           tracks[serverId] = []
           s_opts[serverId] = ["",{},0]
+          s_opts[serverId][1]['search'] = 'auto'
           s_opts[serverId][1]['volume'] = 0.75
           s_opts[serverId][1]['temp'] = dict()
+          print(type(gtimer))
           gtimer.setentry(ctx.guild.id,1)
         except asyncio.TimeoutError:
           await ctx.send('bot has disconnected')
       return True
 
-
-    async def addedtoqueue(self,ctx,data,playlist,position: int,thumbnail=None):
+    @staticmethod
+    async def addedtoqueue(ctx,data,playlist,position:int=0,thumbnail=None):
+     if position is None:
+         position = 0
      serverId = ctx.guild.id
      if position == 0:
        position = "Currently Playing"
