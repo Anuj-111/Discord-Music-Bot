@@ -31,20 +31,20 @@ class Events(commands.Cog):
     async def on_voice_state_update(self,ctx,before,after):
         if before.channel and not after.channel:
             voice = discord.utils.get(self.bot.voice_clients, guild=ctx.guild)
-        if voice and not voice.is_connected():
-            voice.cleanup()
-            if ctx.guild.id in tracks:
-                del tracks[ctx.guild.id]
-                del s_opts[ctx.guild.id]
-            if ctx.guild.id in player:
-                if player[ctx.guild.id].loop:
-                    player[ctx.guild.id].set_loop(False)
-                gtimer.delentry(ctx.guild.id)   
-        elif voice and len(voice.channel.members) == 1:
-            if ctx.guild.id in player:
-                if player[ctx.guild.id].loop:
-                    player[ctx.guild.id].set_loop(False)
-                gtimer.setentry(ctx.guild.id,2)
+            if voice and not voice.is_connected():
+                voice.cleanup()
+                if ctx.guild.id in tracks:
+                    del tracks[ctx.guild.id]
+                    del s_opts[ctx.guild.id]
+                if ctx.guild.id in player:
+                    if player[ctx.guild.id].loop:
+                        player[ctx.guild.id].set_loop(False)
+                    gtimer.delentry(ctx.guild.id)   
+            elif voice and len(voice.channel.members) == 1:
+                if ctx.guild.id in player:
+                    if player[ctx.guild.id].loop:
+                        player[ctx.guild.id].set_loop(False)
+                    gtimer.setentry(ctx.guild.id,2)
 
     @staticmethod
     async def checkconditions(bot,ctx): 
@@ -73,7 +73,6 @@ class Events(commands.Cog):
           s_opts[serverId][1]['search'] = 'auto'
           s_opts[serverId][1]['volume'] = 0.75
           s_opts[serverId][1]['temp'] = dict()
-          print(type(gtimer))
           gtimer.setentry(ctx.guild.id,1)
         except asyncio.TimeoutError:
           await ctx.send('bot has disconnected')
@@ -81,8 +80,6 @@ class Events(commands.Cog):
 
     @staticmethod
     async def addedtoqueue(ctx,data,playlist,position:int=0,thumbnail=None):
-     if position is None:
-         position = 0
      serverId = ctx.guild.id
      if position == 0:
        position = "Currently Playing"
@@ -93,7 +90,8 @@ class Events(commands.Cog):
      else:
        duration = "Livestream"
      if position != "Currently Playing":
-       dtp = toHMS(durationtillplay(serverId,int(position))) 
+       dtp = toHMS(durationtillplay(serverId,int(position)))
+       print(position) 
      else:
        dtp = "Now"
      if not playlist:
@@ -111,7 +109,7 @@ class Events(commands.Cog):
        if thumbnail:
          notif.set_thumbnail(url=thumbnail)
        notif.set_footer(text="`Playlist info may take some time.`")
-     await ctx.send(embed=notif)
+     return notif
                     
 
         

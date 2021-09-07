@@ -16,7 +16,7 @@ import discord
 
 
 class Source(discord.PCMVolumeTransformer):
-    def __init__(self, source,*,data,timeq=None,loop=False,ls=False,volume=0.25):
+    def __init__(self, source,*,data,timeq=None,loop=False,ls=False,volume=0.50):
         super().__init__(source, volume)
         self.data = data
         self.id = data.id
@@ -27,7 +27,7 @@ class Source(discord.PCMVolumeTransformer):
         self.channel = data.channel
         self.tags = data.tags
         self.author = data.author
-        self.ls = data.ls or data.is_live
+        self.ls = data.ls
         self.timeq = timeq
         self.loop = loop
         self.repeat = False
@@ -48,7 +48,7 @@ class Source(discord.PCMVolumeTransformer):
 
 
     @classmethod
-    def streamvideo(cls,data,ss=0,loop=False,options=None,volume=None):
+    def streamvideo(cls,data,ss=0,loop=False,options=None,volume=0.5):
       if ss:
         ffmpeg_options = {
         'options': '-vn '+options,
@@ -59,22 +59,22 @@ class Source(discord.PCMVolumeTransformer):
         'options': '-vn '+options,#" -loglevel repeat+verbose"
         "before_options": " -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 1",
           }
-      return cls(discord.FFmpegPCMAudio(data.website_url, **ffmpeg_options),data=data,timeq=[time.time() if not ss else time.time()+ss[1] ,0,0] if not loop else ["looped",0,0],loop=loop,volume=volume) 
+      return cls(discord.FFmpegPCMAudio(data.video, **ffmpeg_options),data=data,timeq=[time.time() if not ss else time.time()+ss[1] ,0,0] if not loop else ["looped",0,0],loop=loop,volume=volume) 
 
 player = dict()
 
 
-def playmusic(self,ctx,id,nowplaying=None,loop=False,volume=None):
+def playmusic(ctx,id,nowplaying=None,loop=False,volume=None):
       if nowplaying:
-        song_source = Source.streamvideo(nowplaying[0],loop=loop,ss=nowplaying[1],options=self.getoptions(id),volume=volume)
+        song_source = Source.streamvideo(nowplaying[0],loop=loop,ss=nowplaying[1],options=getoptions(id),volume=volume)
         player[id] = song_source
         try:
-          ctx.voice_client.play(song_source, after=lambda e: self.reseteffects(id) or self.playmusic(ctx,id,loop=player[id].loop) if not song_source.repeat else song_source.set_repeat(False))
+          ctx.voice_client.play(song_source, after=lambda e: reseteffects(id) or playmusic(ctx,id,loop=player[id].loop) if not song_source.repeat else song_source.set_repeat(False))
           return None
         except Exception:
           if not song_source.repeat:
-            self.reseteffects(id) 
-            self.playmusic(ctx,id,loop=player[id].loop)
+            reseteffects(id) 
+            playmusic(ctx,id,loop=player[id].loop)
           else:
             song_source.set_repeat(False)
           return None
@@ -87,19 +87,20 @@ def playmusic(self,ctx,id,nowplaying=None,loop=False,volume=None):
           nowplaying = tracks[id].pop(0)
         else:
           del player[id]
-          if not self.timer.checkentry(ctx.guild.id):
-            self.timer.setentry(id,1)
+          if not gtimer.checkentry(ctx.guild.id):
+            gtimer.setentry(id,1)
           return None 
           
-      song_source = Source.streamvideo(nowplaying,loop=loop,options=self.getoptions(id),volume=s_opts[id][1]['volume'])
+      song_source = Source.streamvideo(nowplaying,loop=loop,options=getoptions(id),volume=s_opts[id][1]['volume'])
       player[id] = song_source
       try:
-        ctx.voice_client.play(song_source, after=lambda e: self.reseteffects(id) or self.playmusic(ctx,id,loop=player[id].loop) if not song_source.repeat else song_source.set_repeat(False))
-        self.timer.delentry(ctx.guild.id)
-      except Exception:
+        ctx.voice_client.play(song_source, after=lambda e: reseteffects(id) or playmusic(ctx,id,loop=player[id].loop) if not song_source.repeat else song_source.set_repeat(False))
+        gtimer.delentry(ctx.guild.id)
+      except Exception as e:
+        print(e)
         if not song_source.repeat:
-          self.reseteffects(id) 
-          self.playmusic(ctx,id,loop=player[id].loop)
+          reseteffects(id) 
+          playmusic(ctx,id,loop=player[id].loop)
         else:
           song_source.set_repeat(False)
         return None

@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from youtube_search import YoutubeSearch 
+from youtube_search import YoutubeSearch as yt_search
 import json  
 
 class Searches(ABC):
@@ -18,7 +18,7 @@ class YoutubeSearch(Searches):
     @staticmethod      
     def search(request:str):
           try:
-            ytrequest = json.loads(YoutubeSearch(request, max_results=1).to_json())
+            ytrequest = json.loads(yt_search(request, max_results=1).to_json())
             request = 'https://www.youtube.com/watch?v='+str(ytrequest['videos'][0]['id'])
             return request
           except Exception as e:

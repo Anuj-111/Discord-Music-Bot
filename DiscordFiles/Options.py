@@ -1,4 +1,4 @@
-"""Song.py are for commands that manipulate the source's attributes."""
+"""Options.py are for commands that manipulate the source's attributes."""
 from source import(
     Source,
     player
@@ -13,7 +13,7 @@ import time
 import discord
 from discord.ext import commands
 
-class Song(commands.Cog):
+class Options(commands.Cog):
     def __init__(self,bot):
         self.bot = bot
 
@@ -22,6 +22,7 @@ class Song(commands.Cog):
       if isinstance(ctx.channel, discord.DMChannel):
         await ctx.send(f'Use {self.bot.user.name} in a server please.')
         return None
+
       if volume > 250:
         await ctx.send("Sorry, volume has been capped to 250%.")
         volume = 250
@@ -244,4 +245,4 @@ class Song(commands.Cog):
 
 
 def setup(bot):
-  bot.add_cog(Song(bot))
+  bot.add_cog(Options(bot))

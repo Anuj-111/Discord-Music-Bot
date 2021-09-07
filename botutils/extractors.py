@@ -34,8 +34,7 @@ class DefaultExtractor(Extractors):
         try:
           loop = asyncio.get_event_loop()
           data = await loop.run_in_executor(None, lambda: ytdl.extract_info(url, download=False))
-          data['author'] = author
-          print(data)
+          data['author'] = str(author)
           return data
         except Exception as e:
           print(e)

@@ -12,8 +12,8 @@ from discord.ext import tasks
 #responsible for disconnecting bots when not disconnected manually
 
 class Timer():
-    def __init__(self,bot):
-        self.bot = bot
+    def __init__(self):
+        self.bot = None
         self.check = dict()
         self.check2 = dict()
 
@@ -82,8 +82,11 @@ class Timer():
         else:
             self.check2[str(minute)] = set({serverId})
 
+    def setup(self,bot):
+      self.bot = bot
 
-gtimer = None
+
+gtimer = Timer()
 
 
 

@@ -32,7 +32,6 @@ def reseteffects(id):
         s_opts[id][1]['temp'].clear()
 
 
-
 def progressbar(timepassed,duration):
     temp = ["▬","▬","▬","▬","▬","▬","▬","▬","▬","▬","▬","▬","▬","▬","▬","▬","▬","▬","▬","▬","▬","▬","▬","▬","▬"]
     temp.insert(int(timepassed/duration*100/4),"🔴")
@@ -76,4 +75,35 @@ def durationtillplay(id,position):
     if timepassed < source.player[id].duration:
       td += source.player[id].duration - timepassed
    return td
+   
 
+async def pages(bot,msg,contents):
+    pages = len(contents)
+    cur_page = 1
+    message = await msg.channel.send(embed=contents[cur_page-1])
+    # getting the message object for editing and reacting
+
+    await message.add_reaction("◀️")
+    await message.add_reaction("▶️")
+    buttons =  ["◀️", "▶️"]
+
+    while True:
+        try:
+            reaction, user = await self.bot.wait_for("reaction_add", check=lambda reaction,user: user == msg.author and reaction.emoji in buttons, timeout=60)
+
+            if str(reaction.emoji) == "▶️" and cur_page != pages:
+                cur_page += 1
+                await message.edit(embed=contents[cur_page-1])
+                await message.remove_reaction(reaction, user)
+
+            elif str(reaction.emoji) == "◀️" and cur_page > 1:
+                cur_page -= 1
+                await message.edit(embed=contents[cur_page-1])
+                await message.remove_reaction(reaction, user)
+
+            else:
+                await message.remove_reaction(reaction, user)
+                
+        except asyncio.TimeoutError:
+            await message.delete()
+            break

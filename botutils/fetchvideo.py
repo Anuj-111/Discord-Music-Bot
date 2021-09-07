@@ -14,10 +14,11 @@ from typing import Optional,FrozenSet
 
 
 class Video(MyModel):
+    video: str = Field(alias='url')
     url: str = Field(alias='webpage_url')
     title: str
-    duration: int
-    ls: Optional[bool] = Field(alias='is_live')
+    duration: Optional[int] = None
+    ls: Optional[bool] = Field(alias='is_live') or False
     id: Optional[str] = None
     channel: Optional[str] = None
     thumbnail: Optional[str] = None
@@ -25,7 +26,7 @@ class Video(MyModel):
 
     author: str
 
- 
+
     @pydantic.validator("title")
     @classmethod
     def check_title(cls,value):
@@ -59,17 +60,20 @@ class FetchVideo():
        }
 
         
-    async def get_singlevideo(self,caller:str,request:str,search:str,setting:str="default")->Video:
+    async def get_singlevideo(self,channel,caller:str,request:str,search:str,setting:str="default")->Video:
         try:
             if not "." in request:
-                request = YoutubeSearch().search(request)
+                await channel.send(f"`Searching for {request} with {search} settings`")
+                request = self.externalsearch[setting]().search(request)
+
+            await channel.send(f"`Attempting to request: {request}`")
             return Video(**await self.extractors[setting]().extract(caller,request,search))
         except Exception as e:
             print(e)
             return None
 
 
-    async def get_playlist(self,caller:str,request:str,setting:str="default")->list:
+    async def get_playlist(self,channel,caller:str,request:str,setting:str="default")->list:
         try:
             return [Video(**i) for i in (await self.extractors[setting]().extract(caller,request))['entries']]
         except Exception as e:

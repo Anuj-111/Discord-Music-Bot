@@ -7,7 +7,7 @@ from botutils.extra import(
 import os
 import shutil
 import asyncio
-
+import random
 
 
 
@@ -22,6 +22,15 @@ genius = lyricsgenius.Genius("6U9CZ_uiDd6jCu7aLHD1Muc5JfDzy1FOueTIx4hrU4gHVxSwFB
 class Misc(commands.Cog):
     def __init__(self,bot):
         self.bot = bot
+
+    @commands.command(aliases=['h'],pass_context= True)
+    async def help(self,ctx):
+      embed = discord.Embed(title="Google Docs documentation",description="**[Link to documentation](https://1pt.co/music)**",colour= random.randint(0, 0xffffff))
+      embed.add_field(name='\u200b',value="Doc Written by:[Param Thakkar](https://www.param.me/)",inline=False)
+      embed.set_author(name=f'{self.bot.user.name}',icon_url=self.bot.user.avatar_url)
+      await ctx.send(embed=embed)
+  
+
 
     @commands.command(aliases=['sv'])
     async def save(self,ctx):
@@ -98,37 +107,6 @@ class Misc(commands.Cog):
         await ctx.send("No lyrics found in genius database")
 
     
-    async def pages(self,msg,contents):
-        pages = len(contents)
-        cur_page = 1
-        message = await msg.channel.send(embed=contents[cur_page-1])
-        # getting the message object for editing and reacting
-
-        await message.add_reaction("◀️")
-        await message.add_reaction("▶️")
-        buttons =  ["◀️", "▶️"]
-
-        while True:
-            try:
-                reaction, user = await self.bot.wait_for("reaction_add", check=lambda reaction,user: user == msg.author and reaction.emoji in buttons, timeout=60)
-
-                if str(reaction.emoji) == "▶️" and cur_page != pages:
-                    cur_page += 1
-                    await message.edit(embed=contents[cur_page-1])
-                    await message.remove_reaction(reaction, user)
-
-                elif str(reaction.emoji) == "◀️" and cur_page > 1:
-                    cur_page -= 1
-                    await message.edit(embed=contents[cur_page-1])
-                    await message.remove_reaction(reaction, user)
-
-                else:
-                    await message.remove_reaction(reaction, user)
-                    
-            except asyncio.TimeoutError:
-                await message.delete()
-                break
-  
 
 
 def setup(bot):

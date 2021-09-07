@@ -1,10 +1,15 @@
 from botutils.extra import(
-  pages,
+  progressbar,
   wslice,
-  toHMS
+  toHMS,
+  pages,
 )
+import time
 from source import player
-from storage import tracks
+from storage import(
+  tracks,
+  s_opts
+)
 
 import random
 
@@ -21,16 +26,16 @@ class Queue(commands.Cog):
         await ctx.send(f'Use {self.bot.user.name} in a server please.')
         return None
       serverId = ctx.guild.id
-      id = serverId
+      serverId = serverId
       count = 1
       embeds = []
       embed = discord.Embed(title=str(ctx.guild.name)+"'s Queue", colour= 0x8e0beb)
-      if id in player:
-        if player[id].loop == True:
+      if serverId in player:
+        if player[serverId].loop == True:
           embed.set_footer(text="`Loop:`✔️")
         else:
           embed.set_footer(text="`Loop:`❌")
-        embed.add_field(name="**Now Playing**",value="["+str(wslice(player[id].title,50))+"]("+player[id].url+")`|"+toHMS(player[id].duration)+"| Requested by: "+str(player[id].author)+"`",inline=False)
+        embed.add_field(name="**Now Playing**",value="["+str(wslice(player[serverId].title,50))+"]("+player[serverId].url+")`|"+toHMS(player[serverId].duration)+"| Requested by: "+str(player[serverId].author)+"`",inline=False)
   
         if serverId in tracks: 
           for value,song in enumerate(tracks[serverId]):
@@ -44,12 +49,52 @@ class Queue(commands.Cog):
               embed = discord.Embed(title=str(ctx.guild.name)+"'s Queue'("+str(count)+")",colour=0x8e0beb)
         embeds.append(embed)
         if len(embeds) > 1:
-          await pages(ctx.message,embeds)
+          await pages(self.bot,ctx.message,embeds)
         else:
           await ctx.send(embed=embeds[0])
       
       else:
         await ctx.send("**No songs in queue**")
+
+    @commands.command(aliases=['np','nowplay'])
+    async def nowplaying(self,ctx):
+      if isinstance(ctx.channel, discord.DMChannel):
+        await ctx.send(f'Use {self.bot.user.name} in a server please.')
+        return None
+      
+      serverId = ctx.guild.id
+      if serverId in player:
+        if not player[serverId].loop and not player[serverId].ls:
+          if player[serverId].timeq[2] == 0:
+            timepassed = int(time.time()-(player[serverId].timeq[0]+player[serverId].timeq[1]))
+          else:
+            timepassed = int(player[serverId].timeq[2]-player[serverId].timeq[0])
+          
+          if 'speed' in s_opts[serverId][1]['temp']:
+            if len(s_opts[serverId][1]['temp']['speed'])> 12:
+              timepassed = timepassed * 4
+            else:
+                timepassed = int(timepassed *float(s_opts[serverId][1]['temp']['speed'].split("=")[1][:-1]))
+
+            if timepassed > player[serverId].duration:
+              timepassed = player[serverId].duration
+            bar = progressbar(timepassed,player[serverId].duration)
+            queuetime = toHMS(timepassed)+"/"+toHMS(player[serverId].duration)
+          else:
+            queuetime = "Infite or Looped"
+            bar = progressbar(0,100)
+            
+          embed = discord.Embed(title="`"+queuetime+"`",description=bar,colour=0x000000)
+          embed.set_author(name='Nowplaying: '+player[serverId].title,url=player[serverId].url,icon_url='https://cdn.discordapp.com/attachments/819709519063678978/882819723950182480/noice.gif')
+          embed.set_image(url=player[serverId].thumbnail)
+          if player[serverId].channel:
+            embed.set_footer(text="From: "+player[serverId].channel+" and Requested by: "+player[serverId].author)
+          else:
+            embed.set_footer(text="Requested by: "+player[serverId].author)
+          await ctx.send(embed=embed)
+        else:
+          await ctx.send("No songs are currently playing")
+      
         
     @commands.command(aliases=['sh'],pass_context = True)
     async def shuffle(self,ctx):
