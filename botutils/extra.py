@@ -89,7 +89,7 @@ async def pages(bot,msg,contents):
 
     while True:
         try:
-            reaction, user = await self.bot.wait_for("reaction_add", check=lambda reaction,user: user == msg.author and reaction.emoji in buttons, timeout=60)
+            reaction, user = await bot.wait_for("reaction_add", check=lambda reaction,user: user == msg.author and reaction.emoji in buttons, timeout=60)
 
             if str(reaction.emoji) == "▶️" and cur_page != pages:
                 cur_page += 1
