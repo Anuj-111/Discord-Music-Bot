@@ -16,7 +16,7 @@ class Searches(ABC):
 class YoutubeSearch(Searches):
 
     @staticmethod      
-    def search(request:str):
+    def search(request:str)->str:
           try:
             ytrequest = json.loads(yt_search(request, max_results=1).to_json())
             request = 'https://www.youtube.com/watch?v='+str(ytrequest['videos'][0]['id'])

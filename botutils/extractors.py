@@ -14,27 +14,34 @@ class Extractors(ABC):
 class DefaultExtractor(Extractors):
 
     """Fetches video info from yt-dlp"""
-    async def extract(author:str,url:str,search:str, npl:str=True):
-        ytdl_format_options = {
-            'format': 'bestaudio/best',
-            'restrictfilenames': True,
-            'noplaylist': npl,
-            'playliststart': 2,
-            'playlistend':25,
-            'verbose': False,
-            'quiet': True, 
-            'default_search': search,
-            'nocheckcertificate': True,
-            'ignoreerrors': True,
-            'no_warnings': False,
-            'source_address': '0.0.0.0' # bind to ipv4 since ipv6 addresses cause issues sometimes
-        }
-        ytdl = yt_dlp.YoutubeDL(ytdl_format_options)
+    @staticmethod
+    async def extract(author:str,url:str,search:str=None, npl:bool=True)-> dict:
+        ydl = yt_dlp.YoutubeDL({'format': 'bestaudio/best',
+              'restrictfilenames': True,
+              'noplaylist': npl,
+              'forceduration': "auto",
+              'playliststart':1,
+              'playlistend':25,
+              'verbose': False,
+              'quiet': True, 
+              'default_search': 'auto',
+              'nocheckcertificate': True,
+              'ignoreerrors': True,
+              'no_warnings': False,
+              'source_address': '0.0.0.0' })
+      
 
         try:
           loop = asyncio.get_event_loop()
-          data = await loop.run_in_executor(None, lambda: ytdl.extract_info(url, download=False))
-          data['author'] = str(author)
+          data = await loop.run_in_executor(None, lambda: ydl.extract_info(url, download=False))
+          
+          if npl is False:
+            if 'entries' in data:
+              for i in range(len(data['entries'])):
+                data['entries'][i]['author'] = author
+          else:
+            data['author'] = author
+ 
           return data
         except Exception as e:
           print(e)

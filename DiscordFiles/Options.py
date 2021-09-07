@@ -1,4 +1,5 @@
-"""Options.py are for commands that manipulate the source's attributes."""
+"""Options.py are for commands that manipulate the audio source's attributes."""
+
 from source import(
     Source,
     player
@@ -168,7 +169,7 @@ class Options(commands.Cog):
             speed = float(s_opts[serverId][1]['temp']['speed'].split("=")[1][:-1])
 
 
-        if player[serverId].ls is True:
+        if player[serverId].is_live is True:
           await ctx.send('Livestream forwarding not setup yet!')
           return None
           """
@@ -218,12 +219,12 @@ class Options(commands.Cog):
             speed = float(s_opts[serverId][1]['temp']['speed'].split("=")[1][:-1])
 
         """
-        if player[serverId].ls is True:
+        if player[serverId].is_live is True:
           if player[serverId].duration is None or timepassed*speed > player[serverId].duration:
             player[serverId].duration = timepassed*speed
         """
 
-        if player[serverId].ls is True:
+        if player[serverId].is_live is True:
           await ctx.send('Livestream forwarding not setup yet!')
           return None
         elif value > timepassed*speed:

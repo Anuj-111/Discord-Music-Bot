@@ -87,10 +87,9 @@ class Music(commands.Cog):
     if (video:= await FetchVideo().get_singlevideo(ctx.channel,str(ctx.author),request,search = s_opts[serverId][1]['search'])) is None: 
         await ctx.send("Error occured while fetching video.")
         return
-    
-    request = video.url
 
     
+
     message = await Events.addedtoqueue(ctx,video,playlist,len(tracks[serverId]),thumbnail=video.thumbnail)
     await ctx.send(embed=message)
     tracks[serverId].append(video)
@@ -129,11 +128,10 @@ class Music(commands.Cog):
       await ctx.send("Error occured while fetching video.")
       return None
 
-    request = video.url
   
     
     message = await Events.addedtoqueue(ctx,video,playlist,0,thumbnail=video.thumbnail)
-    await ctx.send(embed=message)
+   
     tracks[serverId].insert(0,video)
 
     if serverId in player:
@@ -176,9 +174,6 @@ class Music(commands.Cog):
     if (video:= await FetchVideo().get_singlevideo(ctx.channel,str(ctx.author),request,search=s_opts[serverId][1]['search'])) is None: 
       await ctx.send("Error occured while fetching video.")
       return
-    
-
-    request = video.url
     
 
     if serverId in player:

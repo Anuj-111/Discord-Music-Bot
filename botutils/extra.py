@@ -1,4 +1,5 @@
 """Just random useful functions"""
+import discord
 from storage import(
     tracks,
     s_opts
@@ -9,10 +10,7 @@ import time
 import asyncio
 
 
-
-
-
-def getoptions(serverId):
+def getoptions(serverId:int)->str:
     if serverId in s_opts:
       if s_opts[serverId][1]['temp']:
         temp = '-af "'
@@ -26,25 +24,25 @@ def getoptions(serverId):
       return ''
 
 
-def reseteffects(id):
+def reseteffects(id:int)->None:
     if id in s_opts:
       if s_opts[id][1]['temp']:
         s_opts[id][1]['temp'].clear()
 
 
-def progressbar(timepassed,duration):
+def progressbar(timepassed:int,duration:int)->str:
     temp = ["▬","▬","▬","▬","▬","▬","▬","▬","▬","▬","▬","▬","▬","▬","▬","▬","▬","▬","▬","▬","▬","▬","▬","▬","▬"]
     temp.insert(int(timepassed/duration*100/4),"🔴")
     return "**|"+"".join(temp)+"|**"
 
-def wslice(word,value):
+def wslice(word:str,value:int)->str:
     word.replace("**","")
     if len(word) > value:
       return word[:value-3]+"..."
     else:
         return word
 
-def toHMS(s):
+def toHMS(s:int)->str: # to Hours Minutes Seconds
     if isinstance(s,int):
       if s > 36000:
         return "%02d:%02d:%02d" % (s/60**2, s/60%60, s%60)
@@ -57,7 +55,7 @@ def toHMS(s):
     else:
       return ""
 
-def durationtillplay(id,position):
+def durationtillplay(id:int,position:int)->int:
    td = 0
    if id in tracks:
      for i in range(position-1):
@@ -77,7 +75,7 @@ def durationtillplay(id,position):
    return td
    
 
-async def pages(bot,msg,contents):
+async def pages(bot:object,msg:str,contents:discord.Embed)->discord.embeds:
     pages = len(contents)
     cur_page = 1
     message = await msg.channel.send(embed=contents[cur_page-1])

@@ -18,7 +18,7 @@ class Video(MyModel):
     url: str = Field(alias='webpage_url')
     title: str
     duration: Optional[int] = None
-    ls: Optional[bool] = Field(alias='is_live') or False
+    is_live: Optional[bool] = False
     id: Optional[str] = None
     channel: Optional[str] = None
     thumbnail: Optional[str] = None
@@ -73,9 +73,10 @@ class FetchVideo():
             return None
 
 
-    async def get_playlist(self,channel,caller:str,request:str,setting:str="default")->list:
+    async def get_playlist(self,caller:str,request:str,setting:str="default")->list:
         try:
-            return [Video(**i) for i in (await self.extractors[setting]().extract(caller,request))['entries']]
+            return [Video(**i) for i in ((await self.extractors[setting]().extract(caller,request,npl=False))['entries'])]
+            
         except Exception as e:
             print(e)
             return None

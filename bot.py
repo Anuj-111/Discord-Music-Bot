@@ -12,7 +12,7 @@ _admins = [278646990777221120]
 
 
 
-bot = commands.Bot(command_prefix = "!",case_insensitive =True,activity = discord.Game(name="Music for your ❤️"))
+bot = commands.Bot(command_prefix = "-",case_insensitive =True,activity = discord.Game(name="Music for your ❤️"))
 bot.remove_command('help')
 
 @bot.event

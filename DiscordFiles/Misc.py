@@ -1,3 +1,6 @@
+"""Misc.py consists of random commands that may be useful that have no relevency to the main purpose of the bot(playing music)"""
+
+
 from source import player
 from botutils.extra import(
     toHMS

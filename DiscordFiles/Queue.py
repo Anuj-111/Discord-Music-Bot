@@ -1,3 +1,5 @@
+"""Queue.py is for commands that have to do with displaying or manipulating the queue. """
+
 from botutils.extra import(
   progressbar,
   wslice,
@@ -35,14 +37,14 @@ class Queue(commands.Cog):
           embed.set_footer(text="`Loop:`✔️")
         else:
           embed.set_footer(text="`Loop:`❌")
-        embed.add_field(name="**Now Playing**",value="["+str(wslice(player[serverId].title,50))+"]("+player[serverId].url+")`|"+toHMS(player[serverId].duration)+"| Requested by: "+str(player[serverId].author)+"`",inline=False)
+        embed.add_field(name="**Now Playing**",value="["+str(wslice(player[serverId].title,50))+"]("+player[serverId].url+")`|"+toHMS(player[serverId].duration)+"| Requested by: "+player[serverId].author+"`",inline=False)
   
         if serverId in tracks: 
           for value,song in enumerate(tracks[serverId]):
             if value == 0:
-              embed.add_field(name='Rest in Queue',value=str(value+1)+")["+wslice(song.title,50)+"]("+song.url+")`|"+toHMS(song.duration)+"| Requested by: "+str(song.author)+"`",inline = False)
+              embed.add_field(name='Rest in Queue',value=str(value+1)+")["+wslice(song.title,50)+"]("+song.url+")`|"+toHMS(song.duration)+"| Requested by: "+song.author+"`",inline = False)
             else:
-              embed.add_field(name='\u200b',value=str(value+1)+")["+wslice(song.title,50)+"]("+song.url+")`|"+toHMS(song.duration)+"| Requested by: "+str(song.author)+"`",inline = False)
+              embed.add_field(name='\u200b',value=str(value+1)+")["+wslice(song.title,50)+"]("+song.url+")`|"+toHMS(song.duration)+"| Requested by: "+song.author+"`",inline = False)
             if (value+2) % 10 == 0: 
               embeds.append(embed)
               count += 1
@@ -64,7 +66,7 @@ class Queue(commands.Cog):
       
       serverId = ctx.guild.id
       if serverId in player:
-        if not player[serverId].loop and not player[serverId].ls:
+        if not player[serverId].loop and not player[serverId].is_live:
           if player[serverId].timeq[2] == 0:
             timepassed = int(time.time()-(player[serverId].timeq[0]+player[serverId].timeq[1]))
           else:
@@ -77,23 +79,23 @@ class Queue(commands.Cog):
                 timepassed = int(timepassed *float(s_opts[serverId][1]['temp']['speed'].split("=")[1][:-1]))
 
             if timepassed > player[serverId].duration:
-              timepassed = player[serverId].duration
-            bar = progressbar(timepassed,player[serverId].duration)
-            queuetime = toHMS(timepassed)+"/"+toHMS(player[serverId].duration)
-          else:
+             timepassed = player[serverId].duration
+          bar = progressbar(timepassed,player[serverId].duration)
+          queuetime = toHMS(timepassed)+"/"+toHMS(player[serverId].duration)
+        else:
             queuetime = "Infite or Looped"
             bar = progressbar(0,100)
             
-          embed = discord.Embed(title="`"+queuetime+"`",description=bar,colour=0x000000)
-          embed.set_author(name='Nowplaying: '+player[serverId].title,url=player[serverId].url,icon_url='https://cdn.discordapp.com/attachments/819709519063678978/882819723950182480/noice.gif')
-          embed.set_image(url=player[serverId].thumbnail)
-          if player[serverId].channel:
-            embed.set_footer(text="From: "+player[serverId].channel+" and Requested by: "+player[serverId].author)
-          else:
-            embed.set_footer(text="Requested by: "+player[serverId].author)
-          await ctx.send(embed=embed)
+        embed = discord.Embed(title="`"+queuetime+"`",description=bar,colour=0x000000)
+        embed.set_author(name='Nowplaying: '+player[serverId].title,url=player[serverId].url,icon_url='https://cdn.discordapp.com/attachments/819709519063678978/882819723950182480/noice.gif')
+        embed.set_image(url=player[serverId].thumbnail)
+        if player[serverId].channel:
+          embed.set_footer(text="From: "+player[serverId].channel+" and Requested by: "+player[serverId].author)
         else:
-          await ctx.send("No songs are currently playing")
+          embed.set_footer(text="Requested by: "+player[serverId].author)
+        await ctx.send(embed=embed)
+      else:
+        await ctx.send("No songs are currently playing")
       
         
     @commands.command(aliases=['sh'],pass_context = True)

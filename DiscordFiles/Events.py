@@ -1,3 +1,5 @@
+"""Events.py consists of discord events and bot events ex. voice cleanup after a forced disconnect"""
+
 from storage import(
     s_opts,
     tracks,
@@ -96,8 +98,8 @@ class Events(commands.Cog):
        dtp = "Now"
      if not playlist:
        notif = discord.Embed(title="Song Added to queue",description="**["+data.title+"]("+data.url+")**",colour= random.randint(0, 0xffffff))
-       notif.add_field(name="Till Played",value=dtp if not data.ls and dtp else "livestream" ,inline=True)
-       notif.add_field(name="Song Duration",value=duration if not data.ls else "livestream",inline=True)
+       notif.add_field(name="Till Played",value=dtp if not data.is_live and dtp else "livestream" ,inline=True)
+       notif.add_field(name="Song Duration",value=duration if not data.is_live else "livestream",inline=True)
        notif.add_field(name="Position",value=position,inline=False)
        if thumbnail:
          notif.set_thumbnail(url=thumbnail)

@@ -27,7 +27,7 @@ class Source(discord.PCMVolumeTransformer):
         self.channel = data.channel
         self.tags = data.tags
         self.author = data.author
-        self.ls = data.ls
+        self.is_live = data.is_live
         self.timeq = timeq
         self.loop = loop
         self.repeat = False
