@@ -26,5 +26,5 @@ class YoutubeSearch(Searches):
             return None
 
     @staticmethod
-    def multi_search(request:str,index:int):
+    def multi_search(request:str,index:int)->list:
         pass
