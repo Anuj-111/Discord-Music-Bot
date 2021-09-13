@@ -57,7 +57,7 @@ class Events(commands.Cog):
         if ctx.author.voice.channel:
           channel = ctx.author.voice.channel
       except Exception:
-        await ctx.send("**User is not in voice Channel**")
+        await ctx.send("**User is not in voice channel**")
         return False
       voice = discord.utils.get(bot.voice_clients, guild=ctx.guild)
       if voice and voice.is_connected():
