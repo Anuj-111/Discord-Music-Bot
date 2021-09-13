@@ -222,12 +222,13 @@ class Music(commands.Cog):
     if isinstance(ctx.channel, discord.DMChannel):
       await ctx.send(f'Use {self.bot.user.name} in a server please.')
       return None
-    serverId = ctx.guild.id
-    if serverId in db:
-       del db[serverId]
-       del s_opts[serverId]
+
     if voice and voice.is_connected():
       if len(voice.channel.members) == 1 or ctx.author.voice and ctx.author.voice.channel == voice.channel:
+        serverId = ctx.guild.id
+        if serverId in db:
+          del db[serverId]
+          del s_opts[serverId]
         if serverId in self.player:
           if self.player[serverId].loop == True:
             self.player[serverId].set_loop(False)
@@ -1271,6 +1272,7 @@ class Music(commands.Cog):
         self.timer.delentry(ctx.guild.id)
       except Exception:
         if not player.repeat:
+          ctx.voice_client.cleanup()
           self.reseteffects(id) 
           self.playmusic(ctx,id,loop=self.player[id].loop)
         else:

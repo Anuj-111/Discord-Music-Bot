@@ -66,6 +66,7 @@ class Events(commands.Cog):
         else:
           if voice.channel.id != channel.id:
             await ctx.send("**Bot already connected to different channel**")
+            return None
       else:
         try:
           serverId = ctx.guild.id
