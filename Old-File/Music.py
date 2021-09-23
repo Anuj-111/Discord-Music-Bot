@@ -70,11 +70,11 @@ class Timer():
                 voice.stop()
                 voice.cleanup()
                 await voice.disconnect()
-            print(f"No one in vc:{self.check[str(now.minute)]}")
+            print(f"No one in vc:{self.check2[str(now.minute)]}")
             del self.check2[str(now.minute)]
               
                     
-  
+    
     def setentry(self,serverId,entryid):
       if entryid == 1:
         now = datetime.datetime.now()
