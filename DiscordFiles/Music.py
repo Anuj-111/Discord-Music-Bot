@@ -1,12 +1,5 @@
-"""Music.py encapsulates all the basic commands for a basic voice bot.
+"""Music.py encapsulates all the basic commands for a basic voice bot."""
 
-  I'm sorry if the play commands look confusing. However, it's ordered like this because:{
-    1) Allows the bot to join without song request
-    2) The information is chained in a way where some parts need to wait for others like making an embed which reads the queue before inserting the song 
-    3) The order in how the songs must be inserted to be able to effectively adding to bottom or top of the array as the songs are skipped and so forth.
-  }
-
-"""
 from source import (
   playmusic,
   player
@@ -213,7 +206,7 @@ class Music(commands.Cog):
       await ctx.send(f'Use {self.bot.user.name} in a server please.')
       return None
     voice = discord.utils.get(self.bot.voice_clients, guild=ctx.guild)
-    if voice and voice.is_connected():
+    if voice and voice.is_connected() and ctx.author.voice and ctx.author.voice.channel == voice.channel:
       serverId = ctx.guild.id
       if serverId in player:
         if player[serverId].loop == True:
@@ -229,7 +222,7 @@ class Music(commands.Cog):
       return None
     voice = discord.utils.get(self.bot.voice_clients, guild=ctx.guild)
 
-    if voice and voice.is_paused():
+    if voice and voice.is_paused() and ctx.author.voice and ctx.author.voice.channel == voice.channel:
       serverId = ctx.guild.id
       player[serverId].set_pausetime(time.time())
       voice.resume()
@@ -242,7 +235,7 @@ class Music(commands.Cog):
         await ctx.send(f'Use {self.bot.user.name} in a server please.')
         return None
 
-     if voice and voice.is_playing():
+     if voice and voice.is_playing() and ctx.author.voice and ctx.author.voice.channel == voice.channel:
        serverId = ctx.guild.id
        player[serverId].set_pausetime(time.time(),pause=True)
        voice.pause()

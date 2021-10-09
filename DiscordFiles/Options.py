@@ -24,12 +24,14 @@ class Options(commands.Cog):
         await ctx.send(f'Use {self.bot.user.name} in a server please.')
         return None
 
-      if volume > 250:
-        await ctx.send("Sorry, volume has been capped to 250%.")
-        volume = 250
-      if volume < 0:
-        await ctx.send("Source volume can't be negative")
-        return None
+      voice = discord.utils.get(self.bot.voice_clients, guild=ctx.guild)
+      if voice and voice.is_connected() and ctx.author.voice and ctx.author.voice.channel == voice.channel:
+        if volume > 250:
+          await ctx.send("Sorry, volume has been capped to 250%.")
+          volume = 250
+        if volume < 0:
+          await ctx.send("Source volume can't be negative")
+          return None
 
 
       serverId = ctx.guild.id
@@ -47,14 +49,16 @@ class Options(commands.Cog):
         await ctx.send(f'Use {self.bot.user.name} in a server please.')
         return None
 
+      voice = discord.utils.get(self.bot.voice_clients, guild=ctx.guild)
       serverId = ctx.guild.id
-      if serverId in player:
-        if player[serverId].loop == False:
-          player[serverId].set_loop(True)
-          await ctx.send("```Song has been looped🔁```")
-        else:
-          player[serverId].set_loop(False)
-          await ctx.send("```Song has been unlooped🔁```")
+      if voice and voice.is_connected() and ctx.author.voice and ctx.author.voice.channel == voice.channel:
+        if serverId in player:
+          if player[serverId].loop == False:
+            player[serverId].set_loop(True)
+            await ctx.send("```Song has been looped🔁```")
+          else:
+            player[serverId].set_loop(False)
+            await ctx.send("```Song has been unlooped🔁```")
 
 
     @commands.command(aliases=['options','settings'],pass_context = True)
@@ -160,7 +164,9 @@ class Options(commands.Cog):
         await ctx.send(f'Use {self.bot.user.name} in a server please.')
         return None
       serverId = ctx.guild.id
-      if serverId in player and ctx.voice_client.is_playing():
+      
+      
+      if serverId in player and ctx.voice_client.is_playing() and ctx.author.voice and ctx.author.voice.channel == ctx.voice_client.channel:
         if player[serverId].timeq[2] == 0:
           timepassed = int(time.time()-(player[serverId].timeq[0]+player[serverId].timeq[1]))
         else:
@@ -209,7 +215,7 @@ class Options(commands.Cog):
         await ctx.send(f'Use {self.bot.user.name} in a server please.')
         return None
       serverId = ctx.guild.id
-      if serverId in player and ctx.voice_client.is_playing():
+      if serverId in player and ctx.voice_client.is_playing() and ctx.author.voice and ctx.author.voice.channel == ctx.voice_client.channel :
         if player[serverId].timeq[2] == 0:
           timepassed = int(time.time()-(player[serverId].timeq[0]+player[serverId].timeq[1]))
         else:
