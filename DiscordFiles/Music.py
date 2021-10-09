@@ -214,6 +214,8 @@ class Music(commands.Cog):
         if voice.is_playing() or voice.is_paused():
           voice.stop()
         await ctx.send("```Song has been skipped⏭️```")
+    else:
+      await ctx.send("User or bot not connected to voice channel")
 
   @commands.command(aliases=['resum'],pass_context = True)
   async def resume(self,ctx):
@@ -227,6 +229,8 @@ class Music(commands.Cog):
       player[serverId].set_pausetime(time.time())
       voice.resume()
       await ctx.send("Music has been resumed!")
+    else:
+      await ctx.send("No music paused or user not connected to vc")
     
   @commands.command(aliases=['paus'],pass_context = True)
   async def pause(self,ctx):
@@ -241,8 +245,8 @@ class Music(commands.Cog):
        voice.pause()
        await ctx.send("Music has been paused")
      else:
-       await ctx.send("No music is playing")
-
+       await ctx.send("No music playing or user not connected to vc")
+    
 
 
 

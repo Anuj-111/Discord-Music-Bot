@@ -59,7 +59,7 @@ class Source(discord.PCMVolumeTransformer):
         'options': '-vn '+options,#" -loglevel repeat+verbose"
         "before_options": " -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 1",
           }
-      return cls(discord.FFmpegPCMAudio(data.video, **ffmpeg_options),data=data,timeq=[time.time() if not ss else time.time()+ss[1] ,0,0] if not loop else ["looped",0,0],loop=loop,volume=volume) 
+      return cls(discord.FFmpegPCMAudio(data.video, **ffmpeg_options),data=data,timeq=[time.time() if not ss else time.time()+ss[1] ,0,0],loop=loop,volume=volume) 
 
 player = dict()
 

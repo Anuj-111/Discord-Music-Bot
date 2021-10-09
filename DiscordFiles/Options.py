@@ -25,22 +25,25 @@ class Options(commands.Cog):
         return None
 
       voice = discord.utils.get(self.bot.voice_clients, guild=ctx.guild)
-      if voice and voice.is_connected() and ctx.author.voice and ctx.author.voice.channel == voice.channel:
-        if volume > 250:
-          await ctx.send("Sorry, volume has been capped to 250%.")
-          volume = 250
-        if volume < 0:
-          await ctx.send("Source volume can't be negative")
-          return None
+      if ctx.author.voice and ctx.author.voice.channel == voice.channel:
+        if voice and voice.is_connected():
+          if volume > 250:
+            await ctx.send("Sorry, volume has been capped to 250%.")
+            volume = 250
+          if volume < 0:
+            await ctx.send("Source volume can't be negative")
+            return None
 
 
-      serverId = ctx.guild.id
-      if serverId in player:
-        voice = discord.utils.get(self.bot.voice_clients, guild=ctx.guild)
-        voice.source.volume = volume / 100
-        await ctx.send(f"Volume for this song has been adjusted {volume}%")
+        serverId = ctx.guild.id
+        if serverId in player:
+          voice = discord.utils.get(self.bot.voice_clients, guild=ctx.guild)
+          voice.source.volume = volume / 100
+          await ctx.send(f"Volume for this song has been adjusted {volume}%")
+        else:
+          await ctx.send("Audio source is not connected to channel.")
       else:
-        await ctx.send("Audio source is not connected to channel.")
+        await ctx.send("User not connected to channel")
 
 
     @commands.command(pass_context = True)
@@ -59,6 +62,8 @@ class Options(commands.Cog):
           else:
             player[serverId].set_loop(False)
             await ctx.send("```Song has been unlooped🔁```")
+      else:
+        await ctx.send("User or bot not connected to channel")
 
 
     @commands.command(aliases=['options','settings'],pass_context = True)
@@ -207,7 +212,7 @@ class Options(commands.Cog):
         playmusic(ctx,serverId,nowplaying=[player[serverId].data,timetoreset],loop=player[serverId].loop,volume=volume)
         await ctx.send('**Song has been forwarded '+str(value)+' seconds**')
       else:
-        await ctx.send("No song is being played in server vc")
+        await ctx.send("No song is being played in server vc or user not connected")
 
     @commands.command(pass_context = True)
     async def rewind(self,ctx,value:int):
@@ -215,7 +220,7 @@ class Options(commands.Cog):
         await ctx.send(f'Use {self.bot.user.name} in a server please.')
         return None
       serverId = ctx.guild.id
-      if serverId in player and ctx.voice_client.is_playing() and ctx.author.voice and ctx.author.voice.channel == ctx.voice_client.channel :
+      if serverId in player and ctx.voice_client.is_playing() and ctx.author.voice and ctx.author.voice.channel == ctx.voice_client.channel:
         if player[serverId].timeq[2] == 0:
           timepassed = int(time.time()-(player[serverId].timeq[0]+player[serverId].timeq[1]))
         else:
@@ -236,7 +241,7 @@ class Options(commands.Cog):
         """
 
         if player[serverId].is_live is True:
-          await ctx.send('Livestream forwarding not setup yet!')
+          await ctx.send('Livestream rewinding not setup yet!')
           return None
         elif value > timepassed*speed:
           await ctx.send("You can't rewind that far")
@@ -252,7 +257,7 @@ class Options(commands.Cog):
         playmusic(ctx,serverId,nowplaying=[player[serverId].data,timetoreset],loop=player[serverId].loop,volume=volume)
         await ctx.send('**Song has been rewinded '+str(value)+' seconds**')
       else:
-        await ctx.send("No song is being played in server vc")
+        await ctx.send("No song is being played in server vc or user not connected")
     
 
 

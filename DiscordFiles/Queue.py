@@ -66,7 +66,7 @@ class Queue(commands.Cog):
       
       serverId = ctx.guild.id
       if serverId in player:
-        if not player[serverId].loop and not player[serverId].is_live:
+        if not player[serverId].is_live:
           if player[serverId].timeq[2] == 0:
             timepassed = int(time.time()-(player[serverId].timeq[0]+player[serverId].timeq[1]))
           else:
@@ -83,7 +83,7 @@ class Queue(commands.Cog):
           bar = progressbar(timepassed,player[serverId].duration)
           queuetime = toHMS(timepassed)+"/"+toHMS(player[serverId].duration)
         else:
-            queuetime = "Infite or Looped"
+            queuetime = "N/A(Livestream)"
             bar = progressbar(0,100)
             
         embed = discord.Embed(title="`"+queuetime+"`",description=bar,colour=0x000000)
