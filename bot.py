@@ -33,26 +33,26 @@ async def on_command_error(ctx, error):
 @bot.command()
 async def load(ctx,extension):
   if ctx.author.id in _admins:
-    bot.load_extension(f'Old-File.{extension}')
+    bot.load_extension(f'DiscordFiles.{extension}')
     await ctx.send("{} loaded".format(extension))
   
 @bot.command()
 async def unload(ctx,extension):
   if ctx.author.id in _admins:
-    bot.unload_extension(f'Old-File.{extension}')
+    bot.unload_extension(f'DiscordFiles.{extension}')
     await ctx.send("{} unloaded".format(extension))
   
 @bot.command()
 async def reload(ctx,extension):
   if ctx.author.id in _admins:
-    bot.unload_extension(f'Old-File.{extension}')
-    bot.load_extension(f'Old-File.{extension}')
+    bot.unload_extension(f'DiscordFiles.{extension}')
+    bot.load_extension(f'DiscordFiles.{extension}')
     await ctx.send("{} reloaded".format(extension))
 
 
-for filename in os.listdir("./Old-File"):
+for filename in os.listdir("./DiscordFiles"):
   if filename.endswith(".py"):
-    bot.load_extension(f"Old-File.{filename[:-3]}")
+    bot.load_extension(f"DiscordFiles.{filename[:-3]}")
 
 
 

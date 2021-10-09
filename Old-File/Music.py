@@ -54,7 +54,6 @@ class Timer():
                 if voice:
                   voice.cleanup()
                   await voice.disconnect()
-              print(f"No Music Playing:{self.check[str(now.minute)]}")
               del self.check[str(now.minute)]
 
         if self.check2:
@@ -70,7 +69,6 @@ class Timer():
                 voice.stop()
                 voice.cleanup()
                 await voice.disconnect()
-            print(f"No one in vc:{self.check2[str(now.minute)]}")
             del self.check2[str(now.minute)]
               
                     
@@ -187,7 +185,6 @@ class Music(commands.Cog):
     if before.channel and not after.channel:
       voice = discord.utils.get(self.bot.voice_clients, guild=ctx.guild)
       if voice and not voice.is_connected():
-        print("Force Disconnected")
         voice.cleanup()
         if ctx.guild.id in db:
           del db[ctx.guild.id]
@@ -197,7 +194,6 @@ class Music(commands.Cog):
             self.player[ctx.guild.id].set_loop(False)
         self.timer.delentry(ctx.guild.id)   
       elif voice and len(voice.channel.members) == 1:
-        print("Only Member")
         if ctx.guild.id in self.player:
           if self.player[ctx.guild.id].loop:
             self.player[ctx.guild.id].set_loop(False)
@@ -1278,7 +1274,8 @@ class Music(commands.Cog):
       try:
         ctx.voice_client.play(player, after=lambda e: self.reseteffects(id) or self.playmusic(ctx,id,loop=self.player[id].loop) if not player.repeat else player.set_repeat(False))
         self.timer.delentry(ctx.guild.id)
-      except Exception:
+      except Exception as e:
+        print(e)
         if not player.repeat:
           self.reseteffects(id) 
           self.playmusic(ctx,id,loop=self.player[id].loop)

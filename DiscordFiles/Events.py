@@ -94,7 +94,6 @@ class Events(commands.Cog):
        duration = "Livestream"
      if position != "Currently Playing":
        dtp = toHMS(durationtillplay(serverId,int(position)))
-       print(position) 
      else:
        dtp = "Now"
      if not playlist:

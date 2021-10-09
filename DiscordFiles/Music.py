@@ -47,12 +47,14 @@ class Music(commands.Cog):
     if isinstance(ctx.channel, discord.DMChannel):
       await ctx.send(f'Use {self.bot.user.name} in a server please.')
       return None
-    serverId = ctx.guild.id
-    if serverId in tracks:
-       del tracks[serverId]
-       del s_opts[serverId]
+
     if voice and voice.is_connected():
       if len(voice.channel.members) == 1 or ctx.author.voice and ctx.author.voice.channel == voice.channel:
+        serverId = ctx.guild.id
+        if serverId in tracks:
+          del tracks[serverId]
+          del s_opts[serverId]
+      
         if serverId in player:
           if player[serverId].loop == True:
             player[serverId].set_loop(False)
@@ -203,8 +205,7 @@ class Music(commands.Cog):
         tracks[serverId].insert(0,video) 
       if firstsong:
         tracks[serverId].insert(0,firstsong) 
-      else:
-        return None
+      
 
   @commands.command(aliases=['fs','skip'],pass_context = True)
   async def forceskip(self,ctx):

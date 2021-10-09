@@ -27,6 +27,11 @@ class Options(commands.Cog):
       if volume > 250:
         await ctx.send("Sorry, volume has been capped to 250%.")
         volume = 250
+      if volume < 0:
+        await ctx.send("Source volume can't be negative")
+        return None
+
+
       serverId = ctx.guild.id
       if serverId in player:
         voice = discord.utils.get(self.bot.voice_clients, guild=ctx.guild)
