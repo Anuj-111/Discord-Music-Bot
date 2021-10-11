@@ -19,7 +19,7 @@ from discord.ext import commands
 import yt_dlp
 from yt_dlp import DownloadError
 import lyricsgenius
-genius = lyricsgenius.Genius("6U9CZ_uiDd6jCu7aLHD1Muc5JfDzy1FOueTIx4hrU4gHVxSwFBvHYEjLfWebxz7o")
+genius = lyricsgenius.Genius(os.environ['GENIUS_TOKEN'])
 
 
 class Misc(commands.Cog):
