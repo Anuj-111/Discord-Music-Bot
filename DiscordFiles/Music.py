@@ -135,7 +135,7 @@ class Music(commands.Cog):
 
       voice = discord.utils.get(self.bot.voice_clients, guild=ctx.guild)
       voice.stop() #Playmusic uses a recursive function. Stopping plays next track
-      await ctx.send("Song has been skipped")
+      await ctx.send(f'Song has been skipped. Playing {video.title}')
     else:
       playmusic(ctx,serverId) #If no song in playlist, init playmusic function
     
