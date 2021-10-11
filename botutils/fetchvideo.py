@@ -53,24 +53,36 @@ class FetchVideo():
     def __init__(self):
        self.extractors = {
             "default": DefaultExtractor,
+            
             }
        self.externalsearch = {
            "default": YoutubeSearch,
            "yt": YoutubeSearch
        }
+       self.names = {
+           "scsearch:": "soundcloud",
+           "ytsearch:": "youtube", 
+           "auto": "youtube",
+
+       }
 
         
     async def get_singlevideo(self,channel,caller:str,request:str,search:str,setting:str="default")->Video:
-        try:
-            if not "." in request:
-                await channel.send(f"`Searching for {request} with {search} settings`")
-                request = self.externalsearch[setting]().search(request)
+        for i in range(2):
+            try:
+                await channel.send(f"`Attempting to request: {request} with {self.names[search]} settings`")
+                return Video(**await self.extractors[setting]().extract(caller,request,search))
+            except Exception as e:
+                if i == 1:
+                    print(e)
+                    return None
+                await channel.send(f"`Searching for {request} with {self.names[search]} fallback settings`")
+                if (request := self.externalsearch[setting]().search(request)) is None:
+                    print(e)
+                    return None
 
-            await channel.send(f"`Attempting to request: {request}`")
-            return Video(**await self.extractors[setting]().extract(caller,request,search))
-        except Exception as e:
-            print(e)
-            return None
+            
+                
 
 
     async def get_playlist(self,caller:str,request:str,setting:str="default")->list:

@@ -1,4 +1,3 @@
-
 import os
 from timer import(
   gtimer
@@ -12,7 +11,7 @@ _admins = [278646990777221120]
 
 
 
-bot = commands.Bot(command_prefix = "!",case_insensitive =True,activity = discord.Game(name="Music"))
+bot = commands.Bot(command_prefix = "-",case_insensitive =True,activity = discord.Game(name="Music"))
 bot.remove_command('help')
 
 @bot.event
