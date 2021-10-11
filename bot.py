@@ -55,4 +55,4 @@ for filename in os.listdir("./DiscordFiles"):
 
 
 
-bot.run("ODcwNDE5ODkwMjI4NTY4MTE1.YQMfsQ.UvCIVgaeYkmm99zkSlgWjCV0aKM")
+bot.run(os.environ['TOKEN'])
