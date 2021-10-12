@@ -9,7 +9,7 @@ from discord.ext import tasks
 
 
 
-#responsible for disconnecting bots when not disconnected manually
+#responsible for disconnecting bot when not disconnected manually
 
 class Timer():
     def __init__(self):

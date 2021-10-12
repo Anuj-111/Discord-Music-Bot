@@ -59,7 +59,7 @@ def durationtillplay(id:int,position:int)->int:
    td = 0
    if id in tracks:
      for i in range(position-1):
-       td += tracks[id][i].get('duration')
+       td += tracks[id][i].duration
    if id in source.player:
     if source.player[id].timeq[2] == 0:
       timepassed = int(time.time()-(source.player[id].timeq[0]+source.player[id].timeq[1]))

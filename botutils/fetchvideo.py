@@ -44,7 +44,7 @@ class Video(MyModel):
       
    
     class Config:
-        allow_mutation = False
+        allow_mutation = False 
 
 
 

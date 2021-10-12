@@ -165,10 +165,17 @@ class Options(commands.Cog):
       elif setting.lower() == "soundcloud":
         if s_opts[serverId][1]['search'] != "scsearch:":
           s_opts[serverId][1]['search'] = 'scsearch:'
-          await ctx.send("Default_Search set to SoundCloud")
+          await ctx.send("Default_search set to SoundCloud")
         else:
           s_opts[serverId][1]['search'] = 'auto'
-          await ctx.send("Default_Search set to Youtube")
+          await ctx.send("Default_search set to Youtube")
+      elif setting.lower() == "youtube":
+          if s_opts[serverId][1]['search'] != "auto":
+            s_opts[serverId][1]['search'] = 'auto'
+            await ctx.send("Default_search set to Youtube")
+
+          else:
+            await ctx.send("Already set to Youtube")
 
 
     @commands.command(pass_context = True)
